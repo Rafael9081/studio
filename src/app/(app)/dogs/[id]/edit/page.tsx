@@ -1,9 +1,10 @@
 import DogForm from "@/components/forms/dog-form";
-import { getDogById } from "@/lib/data";
+import { getDogById, getDogs } from "@/lib/data";
 import { notFound } from "next/navigation";
 
 export default async function EditDogPage({ params }: { params: { id: string } }) {
   const dog = await getDogById(params.id);
+  const dogs = await getDogs();
 
   if (!dog) {
     notFound();
@@ -17,7 +18,7 @@ export default async function EditDogPage({ params }: { params: { id: string } }
             Atualize as informações para {dog.name}.
           </p>
         </div>
-        <DogForm dog={dog} />
+        <DogForm dog={dog} allDogs={dogs} />
     </div>
   )
 }

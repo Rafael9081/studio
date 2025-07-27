@@ -8,6 +8,11 @@ export type Dog = {
   salePrice?: number;
   dateOfSale?: Date;
   avatar?: string;
+  birthDate?: Date;
+  fatherId?: string;
+  motherId?: string;
+  observations?: string;
+  specialCharacteristics?: string;
 };
 
 export type Tutor = {

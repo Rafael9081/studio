@@ -1,7 +1,7 @@
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
-import { MoreHorizontal, ArrowUpRight } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -27,13 +27,13 @@ export const columns: ColumnDef<Dog>[] = [
     cell: ({ row }) => {
         const dog = row.original;
         return (
-            <div className="flex items-center gap-3">
+            <Link href={`/dogs/${dog.id}`} className="flex items-center gap-3 group hover:underline">
                 <Avatar>
                     <AvatarImage src={dog.avatar} data-ai-hint="dog" alt={dog.name} />
                     <AvatarFallback>{dog.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <span className="font-medium">{dog.name}</span>
-            </div>
+            </Link>
         )
     }
   },
@@ -85,6 +85,9 @@ export const columns: ColumnDef<Dog>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
+             <DropdownMenuItem asChild>
+              <Link href={`/dogs/${dog.id}`}>Ver Detalhes</Link>
+            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href={`/dogs/${dog.id}/edit`}>Editar Detalhes</Link>
             </DropdownMenuItem>

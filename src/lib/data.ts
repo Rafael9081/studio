@@ -5,11 +5,11 @@ import { type Dog, type Tutor, type Expense, type Sale } from './types';
 import { revalidatePath } from 'next/cache';
 
 let dogs: Dog[] = [
-  { id: '1', name: 'Buddy', breed: 'Golden Retriever', sex: 'Macho', status: 'Disponível', avatar: 'https://placehold.co/40x40.png' },
-  { id: '2', name: 'Lucy', breed: 'Labrador', sex: 'Fêmea', status: 'Disponível', avatar: 'https://placehold.co/40x40.png' },
-  { id: '3', name: 'Max', breed: 'Pastor Alemão', sex: 'Macho', status: 'Vendido', tutorId: '1', salePrice: 1200, dateOfSale: new Date('2024-05-15'), avatar: 'https://placehold.co/40x40.png' },
-  { id: '4', name: 'Daisy', breed: 'Beagle', sex: 'Fêmea', status: 'Disponível', avatar: 'https://placehold.co/40x40.png' },
-  { id: '5', name: 'Charlie', breed: 'Poodle', sex: 'Macho', status: 'Vendido', tutorId: '2', salePrice: 1500, dateOfSale: new Date('2024-06-01'), avatar: 'https://placehold.co/40x40.png' },
+  { id: '1', name: 'Buddy', breed: 'Golden Retriever', sex: 'Macho', status: 'Disponível', avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2023-01-15'), observations: 'Muito brincalhão e amigável.' },
+  { id: '2', name: 'Lucy', breed: 'Labrador', sex: 'Fêmea', status: 'Disponível', avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2023-03-20'), specialCharacteristics: 'Pelagem cor de chocolate.' },
+  { id: '3', name: 'Max', breed: 'Pastor Alemão', sex: 'Macho', status: 'Vendido', tutorId: '1', salePrice: 1200, dateOfSale: new Date('2024-05-15'), avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2022-11-10'), fatherId: '1', motherId: '2' },
+  { id: '4', name: 'Daisy', breed: 'Beagle', sex: 'Fêmea', status: 'Disponível', avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2023-08-01') },
+  { id: '5', name: 'Charlie', breed: 'Poodle', sex: 'Macho', status: 'Vendido', tutorId: '2', salePrice: 1500, dateOfSale: new Date('2024-06-01'), avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2023-05-25') },
 ];
 
 let tutors: Tutor[] = [
@@ -23,6 +23,7 @@ let expenses: Expense[] = [
     {id: '2', dogId: '1', type: 'Vacinas', amount: 120, date: new Date('2024-06-10'), description: 'Vacinas anuais'},
     {id: '3', dogId: '2', type: 'Veterinário', amount: 75, date: new Date('2024-06-12'), description: 'Tratamento de pulgas'},
     {id: '4', dogId: '3', type: 'Geral', amount: 30, date: new Date('2024-05-10'), description: 'Coleira e guia novas'},
+    {id: '5', dogId: '1', type: 'Veterinário', amount: 200, date: new Date('2024-07-01'), description: 'Consulta de rotina'},
 ];
 
 let sales: Sale[] = [
@@ -34,17 +35,18 @@ let sales: Sale[] = [
 export const getDogs = async () => dogs;
 export const getDogById = async (id: string) => dogs.find(dog => dog.id === id);
 export const addDog = async (dog: Omit<Dog, 'id' | 'status' | 'avatar'>) => {
-  const newDog: Dog = { ...dog, id: String(Date.now()), status: 'Disponível', avatar: 'https://placehold.co/40x40.png' };
+  const newDog: Dog = { ...dog, id: String(Date.now()), status: 'Disponível', avatar: `https://placehold.co/40x40.png?text=${dog.name.charAt(0)}` };
   dogs.push(newDog);
   revalidatePath('/dogs');
   revalidatePath('/dashboard');
   return newDog;
 };
-export const updateDog = async (updatedDog: Dog) => {
+export const updateDog = async (updatedDog: Omit<Dog, 'id'> & { id: string }) => {
     const index = dogs.findIndex(dog => dog.id === updatedDog.id);
     if(index !== -1) {
-        dogs[index] = updatedDog;
+        dogs[index] = { ...dogs[index], ...updatedDog };
         revalidatePath('/dogs');
+        revalidatePath(`/dogs/${updatedDog.id}`);
         revalidatePath(`/dogs/${updatedDog.id}/edit`);
         revalidatePath('/dashboard');
         return dogs[index];
