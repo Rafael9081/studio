@@ -13,7 +13,7 @@ import {
   SidebarMenuButton
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { Dog, Home, Users, Settings } from 'lucide-react';
+import { Dog, Home, Users, Settings, PawPrint } from 'lucide-react';
 import MainNav from '@/components/main-nav';
 
 export default function AppLayout({ children }: { children: ReactNode }) {
@@ -22,10 +22,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2 p-2">
-            <Avatar>
-              <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="paw logo" alt="Pawsome Logo" />
-            </Avatar>
-            <h1 className="font-headline text-lg font-bold">Pawsome</h1>
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                <PawPrint className="h-6 w-6" />
+            </div>
+            <h1 className="font-headline text-lg font-bold">Gerenciador de Canil</h1>
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -50,9 +50,6 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex-1">
                 {/* Pode adicionar breadcrumbs ou título da página aqui */}
             </div>
-            <Avatar>
-                <AvatarFallback>U</AvatarFallback>
-            </Avatar>
         </header>
         <main className="flex-1 p-6">
             {children}
