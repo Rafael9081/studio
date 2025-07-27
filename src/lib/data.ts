@@ -33,7 +33,7 @@ let sales: Sale[] = [
 // Dogs
 export const getDogs = async () => dogs;
 export const getDogById = async (id: string) => dogs.find(dog => dog.id === id);
-export const addDog = async (dog: Omit<Dog, 'id' | 'status'>) => {
+export const addDog = async (dog: Omit<Dog, 'id' | 'status' | 'avatar'>) => {
   const newDog: Dog = { ...dog, id: String(Date.now()), status: 'Disponível', avatar: 'https://placehold.co/40x40.png' };
   dogs.push(newDog);
   revalidatePath('/dogs');
@@ -58,7 +58,7 @@ export const deleteDog = async (id: string) => {
     revalidatePath('/dogs');
     revalidatePath('/dashboard');
 };
-export const recordSale = async (sale: Sale) => {
+export const recordSale = async (sale: Omit<Sale, 'id'>) => {
     const dog = await getDogById(sale.dogId);
     if (dog) {
         dog.status = 'Vendido';
@@ -69,7 +69,7 @@ export const recordSale = async (sale: Sale) => {
         sales.push(sale);
         revalidatePath('/dashboard');
         revalidatePath('/dogs');
-        revalidatePath(`/dogs/${sale.dogId}/edit`);
+        revalidatePath('/sales');
     }
 };
 
@@ -77,7 +77,7 @@ export const recordSale = async (sale: Sale) => {
 // Tutors
 export const getTutors = async () => tutors;
 export const getTutorById = async (id: string) => tutors.find(tutor => tutor.id === id);
-export const addTutor = async (tutor: Omit<Tutor, 'id'>) => {
+export const addTutor = async (tutor: Omit<Tutor, 'id' | 'avatar'>) => {
     const newTutor: Tutor = { ...tutor, id: String(Date.now()), avatar: 'https://placehold.co/40x40.png' };
     tutors.push(newTutor);
     revalidatePath('/tutors');
@@ -108,11 +108,13 @@ export const deleteTutor = async (id: string) => {
 };
 
 // Expenses
+export const getExpenses = async () => expenses;
 export const getExpensesByDogId = async (dogId: string) => expenses.filter(e => e.dogId === dogId);
 export const addExpense = async (expense: Omit<Expense, 'id'>) => {
     const newExpense = { ...expense, id: String(Date.now()) };
     expenses.push(newExpense);
-    revalidatePath(`/dogs/${expense.dogId}/edit`);
+    revalidatePath('/dashboard');
+    revalidatePath('/expenses');
     return newExpense;
 }
 

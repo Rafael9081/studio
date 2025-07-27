@@ -1,15 +1,15 @@
 'use client';
 
 import * as React from 'react';
-import { Dog, Users, DollarSign, Calendar as CalendarIcon } from 'lucide-react';
+import { Dog, Users, DollarSign, Calendar as CalendarIcon, Wallet } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
-import type { Dog as DogType, Tutor, Sale } from '@/lib/types';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Legend } from 'recharts';
+import type { Dog as DogType, Tutor, Sale, Expense } from '@/lib/types';
 import { addDays, format } from "date-fns"
 import { ptBR } from 'date-fns/locale';
 import { DateRange } from "react-day-picker"
@@ -27,9 +27,10 @@ interface DashboardClientProps {
   dogs: DogType[];
   tutors: Tutor[];
   sales: Sale[];
+  expenses: Expense[];
 }
 
-export default function DashboardClient({ dogs, tutors, sales }: DashboardClientProps) {
+export default function DashboardClient({ dogs, tutors, sales, expenses }: DashboardClientProps) {
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: addDays(new Date(), -29),
     to: new Date(),
@@ -52,33 +53,57 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
     return saleDate >= fromDate;
   });
 
-  const totalRevenue = filteredSales.reduce((acc, sale) => acc + sale.price, 0);
-
-  const salesByDay = filteredSales.reduce((acc, sale) => {
-    const day = format(new Date(sale.date), 'yyyy-MM-dd');
-    if (!acc[day]) {
-      acc[day] = 0;
+  const filteredExpenses = expenses.filter(expense => {
+    if (!date?.from) return true;
+    const expenseDate = new Date(expense.date);
+    const fromDate = new Date(date.from);
+    fromDate.setHours(0,0,0,0);
+    
+    if (date.to) {
+        const toDate = new Date(date.to)
+        toDate.setHours(23,59,59,999);
+        return expenseDate >= fromDate && expenseDate <= toDate;
     }
-    acc[day] += sale.price;
-    return acc;
-  }, {} as Record<string, number>);
+    return expenseDate >= fromDate;
+  });
 
-  const chartData = Object.entries(salesByDay).map(([date, revenue]) => ({
-    date: format(new Date(date), 'd MMM', { locale: ptBR }),
-    revenue
+  const totalRevenue = filteredSales.reduce((acc, sale) => acc + sale.price, 0);
+  const totalExpenses = filteredExpenses.reduce((acc, expense) => acc + expense.amount, 0);
+
+  const dailyData = [...filteredSales, ...filteredExpenses].reduce((acc, item) => {
+    const day = format(new Date(item.date), 'yyyy-MM-dd');
+    if (!acc[day]) {
+      acc[day] = { date: day, revenue: 0, expenses: 0 };
+    }
+    if ('price' in item) {
+      acc[day].revenue += item.price;
+    } else {
+      acc[day].expenses += item.amount;
+    }
+    return acc;
+  }, {} as Record<string, { date: string, revenue: number, expenses: number }>);
+
+  const chartData = Object.values(dailyData).map(item => ({
+    date: format(new Date(item.date), 'd MMM', { locale: ptBR }),
+    revenue: item.revenue,
+    expenses: item.expenses
   })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 
   const chartConfig = {
     revenue: {
       label: 'Receita',
-      color: 'hsl(var(--accent))',
+      color: 'hsl(var(--chart-1))',
     },
+    expenses: {
+        label: 'Despesas',
+        color: 'hsl(var(--chart-2))',
+    }
   };
 
   return (
     <>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Cães Disponíveis</CardTitle>
@@ -109,7 +134,21 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
               {totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Com base no intervalo de datas selecionado
+              Com base no período
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Despesas Totais</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {totalExpenses.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Com base no período
             </p>
           </CardContent>
         </Card>
@@ -120,7 +159,7 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <CardTitle className="font-headline">Resumo Financeiro</CardTitle>
-                <p className="text-sm text-muted-foreground">Um resumo das vendas ao longo do tempo.</p>
+                <p className="text-sm text-muted-foreground">Um resumo das vendas e despesas ao longo do tempo.</p>
               </div>
               <Popover>
                 <PopoverTrigger asChild>
@@ -163,7 +202,7 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
         </CardHeader>
         <CardContent className="h-[300px]">
           <ChartContainer config={chartConfig} className="w-full h-full">
-            <BarChart accessibilityLayer data={chartData}>
+            <LineChart accessibilityLayer data={chartData}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
               <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `R$${value}`} />
@@ -171,8 +210,10 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
                 cursor={false}
                 content={<ChartTooltipContent indicator="dot" />}
               />
-              <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
-            </BarChart>
+              <Legend />
+              <Line dataKey="revenue" type="monotone" stroke="var(--color-revenue)" strokeWidth={2} dot={false} name="Receita" />
+              <Line dataKey="expenses" type="monotone" stroke="var(--color-expenses)" strokeWidth={2} dot={false} name="Despesas" />
+            </LineChart>
           </ChartContainer>
         </CardContent>
       </Card>
