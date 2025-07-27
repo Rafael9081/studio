@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ArrowRight, Dog, DollarSign, Wallet } from 'lucide-react';
+import { ArrowRight, Dog, DollarSign, Wallet, Briefcase } from 'lucide-react';
 
 import { Activity } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,8 @@ function getActivityIcon(type: Activity['type']) {
       return <Dog className="h-5 w-5" />;
     case 'expense_added':
       return <Wallet className="h-5 w-5 text-red-500" />;
+    case 'general_expense_added':
+      return <Briefcase className="h-5 w-5 text-red-500" />;
     case 'sale_added':
       return <DollarSign className="h-5 w-5 text-green-500" />;
     default:
@@ -53,7 +55,7 @@ export default function RecentActivityList({ items }: { items: Activity[] }) {
             {item.amount && (
                 <Badge variant={item.type === 'sale_added' ? 'secondary' : 'destructive'} className={cn(
                     item.type === 'sale_added' && 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-                    item.type === 'expense_added' && 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+                    (item.type === 'expense_added' || item.type === 'general_expense_added') && 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
                 )}>
                  {item.type === 'sale_added' ? '+' : '-'} {item.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </Badge>

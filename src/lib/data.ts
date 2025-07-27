@@ -295,8 +295,22 @@ export const getGeneralExpenses = async (): Promise<GeneralExpense[]> => {
 export const addGeneralExpense = async (expense: Omit<GeneralExpense, 'id'>) => {
     const expensesCol = collection(db, 'generalExpenses');
     const docRef = await addDoc(expensesCol, expense);
+
+    // Add to recent activity
+    const activityCol = collection(db, 'activity');
+    await addDoc(activityCol, {
+        type: 'general_expense_added',
+        title: `Despesa Geral: ${expense.type}`,
+        description: expense.description,
+        link: '/financials', // Link to general financials page
+        date: expense.date,
+        amount: expense.amount,
+        entityId: docRef.id
+    });
+
     revalidatePath('/dashboard');
     revalidatePath('/general-expenses');
+    revalidatePath('/financials');
     return { id: docRef.id, ...expense };
 }
 

@@ -49,7 +49,7 @@ export type Sale = {
 
 export type Activity = {
     id: string;
-    type: 'dog_added' | 'sale_added' | 'expense_added';
+    type: 'dog_added' | 'sale_added' | 'expense_added' | 'general_expense_added';
     title: string;
     description: string;
     date: Date;
