@@ -1,6 +1,7 @@
 'use server';
 
 import { type Dog, type Tutor, type Expense, type Sale, type GeneralExpense } from './types';
+import { type LitterData, type PuppyData } from '@/components/forms/litter-form';
 import { revalidatePath } from 'next/cache';
 import { db, storage } from './firebase/config';
 import { 
@@ -36,8 +37,8 @@ const convertTimestamps = (data: any) => {
 
 // Helper to upload image and get URL
 const uploadImage = async (file: string, dogId: string): Promise<string> => {
-    if (!file.startsWith('data:image')) {
-        // Not a new base64 image, return as is (might be existing URL)
+    if (!file || !file.startsWith('data:image')) {
+        // Not a new base64 image, return as is (might be existing URL or empty)
         return file;
     }
     const imageRef = storageRef(storage, `dogs/${dogId}/${new Date().getTime()}`);
@@ -89,9 +90,15 @@ export const updateDog = async (updatedDog: Omit<Dog, 'id'> & { id: string }) =>
     const { id, avatar, ...dogData } = updatedDog;
     const dogDocRef = doc(db, 'dogs', id);
 
-    if (avatar) {
+    const existingDog = await getDogById(id);
+
+    // Only upload a new image if the avatar has changed and it's a base64 string
+    if (avatar && avatar !== existingDog?.avatar && avatar.startsWith('data:image')) {
         const newAvatarUrl = await uploadImage(avatar, id);
         dogData.avatar = newAvatarUrl;
+    } else {
+        // Keep the old avatar if a new one isn't provided or it's the same URL
+        dogData.avatar = existingDog?.avatar;
     }
 
     await updateDoc(dogDocRef, dogData);
@@ -178,7 +185,7 @@ export const getTutorById = async (id: string) => {
 };
 
 export const addTutor = async (tutor: Omit<Tutor, 'id' | 'avatar'>) => {
-    const newTutor = { ...tutor, avatar: 'https://placehold.co/40x40.png' };
+    const newTutor = { ...tutor, avatar: `https://placehold.co/40x40.png?text=${tutor.name.charAt(0)}` };
     const tutorsCol = collection(db, 'tutors');
     const docRef = await addDoc(tutorsCol, newTutor);
     revalidatePath('/tutors');
@@ -254,4 +261,76 @@ export const getSales = async (): Promise<Sale[]> => {
     const salesCol = collection(db, 'sales');
     const salesSnapshot = await getDocs(salesCol);
     return salesSnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as Sale[];
+};
+
+// Litters
+export const addLitter = async (litter: Omit<LitterData, 'puppies'> & { breed: string, puppies: PuppyData[] }) => {
+    const batch = writeBatch(db);
+    const dogsCol = collection(db, 'dogs');
+
+    for (const puppy of litter.puppies) {
+        const newDogRef = doc(dogsCol); // Create a new document reference with an auto-generated ID
+
+        const { avatar, ...puppyData } = puppy;
+
+        const newDogPayload = {
+            ...puppyData,
+            breed: litter.breed,
+            birthDate: litter.birthDate,
+            fatherId: litter.fatherId,
+            motherId: litter.motherId,
+            status: 'Disponível' as const,
+            avatar: '', // Placeholder, will be updated
+        };
+
+        // Set the document data first (without avatar)
+        batch.set(newDogRef, newDogPayload);
+
+        // Upload image and schedule an update for the avatar URL
+        const uploadAndUpdateAvatar = async () => {
+            let avatarUrl = `https://placehold.co/40x40.png?text=${puppy.name.charAt(0)}`;
+            if (avatar) {
+                avatarUrl = await uploadImage(avatar, newDogRef.id);
+            }
+            // Use a new batch or update directly, as batch has been committed.
+            await updateDoc(newDogRef, { avatar: avatarUrl });
+        };
+        
+        // We can't await inside the loop, so we'll handle image uploads after the batch commit.
+        // For simplicity here, we'll do them sequentially after. A more robust solution might
+        // use Promise.all() after the loop.
+    }
+
+    await batch.commit();
+
+    // Now, let's handle the image uploads.
+    // A better approach for production would be to trigger a cloud function
+    // on document creation to handle image processing and updating.
+    // For now, we'll re-fetch the newly created dogs to get their IDs.
+    const newDogsQuery = query(
+        dogsCol,
+        where('fatherId', '==', litter.fatherId),
+        where('motherId', '==', litter.motherId),
+        where('birthDate', '==', litter.birthDate),
+    );
+
+    const newDogsSnapshot = await getDocs(newDogsQuery);
+
+    await Promise.all(newDogsSnapshot.docs.map(async (dogDoc) => {
+        const dogData = dogDoc.data() as Dog;
+        const correspondingPuppy = litter.puppies.find(p => p.name === dogData.name && p.sex === dogData.sex);
+
+        if (correspondingPuppy?.avatar) {
+            const avatarUrl = await uploadImage(correspondingPuppy.avatar, dogDoc.id);
+            await updateDoc(doc(db, 'dogs', dogDoc.id), { avatar: avatarUrl });
+        } else {
+            const avatarUrl = `https://placehold.co/40x40.png?text=${dogData.name.charAt(0)}`;
+            await updateDoc(doc(db, 'dogs', dogDoc.id), { avatar: avatarUrl });
+        }
+    }));
+
+
+    revalidatePath('/dogs');
+    revalidatePath('/dashboard');
+    revalidatePath('/litters');
 };
