@@ -2,89 +2,102 @@
 
 import { type Dog, type Tutor, type Expense, type Sale, type GeneralExpense } from './types';
 import { revalidatePath } from 'next/cache';
-import fs from 'fs';
-import path from 'path';
+import { db } from './firebase/config';
+import { 
+  collection, 
+  getDocs, 
+  getDoc, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc,
+  Timestamp,
+  query,
+  where,
+  writeBatch
+} from 'firebase/firestore';
 
-const dataDir = path.join(process.cwd(), 'src', 'lib', 'data');
-const dogsFilePath = path.join(dataDir, 'dogs.json');
-const tutorsFilePath = path.join(dataDir, 'tutors.json');
-const expensesFilePath = path.join(dataDir, 'expenses.json');
-const generalExpensesFilePath = path.join(dataDir, 'generalExpenses.json');
-const salesFilePath = path.join(dataDir, 'sales.json');
-
-
-// Helper to read data from JSON file
-const readData = <T>(filePath: string, defaultData: T[] = []): T[] => {
-  try {
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
+// Helper to convert Firestore Timestamps to JS Date objects
+const convertTimestamps = (data: any) => {
+  if (!data) return data;
+  for (const key in data) {
+    if (data[key] instanceof Timestamp) {
+      data[key] = data[key].toDate();
     }
-    if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, JSON.stringify(defaultData, null, 2));
-      return defaultData;
-    }
-    const data = fs.readFileSync(filePath, 'utf8');
-    // For dates, we need to convert them back to Date objects
-    return JSON.parse(data, (key, value) => {
-      if (key.endsWith('Date') || key === 'date' || key === 'dateOfSale' || key === 'birthDate') {
-        if (value) return new Date(value);
-      }
-      return value;
-    });
-  } catch (error) {
-    console.error(`Error reading from ${filePath}:`, error);
-    return defaultData;
   }
+  return data;
 };
 
-// Helper to write data to JSON file
-const writeData = (filePath: string, data: any) => {
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  } catch (error) {
-    console.error(`Error writing to ${filePath}:`, error);
-  }
-};
 
 // Dogs
-export const getDogs = async (): Promise<Dog[]> => readData<Dog>(dogsFilePath, []);
-export const getDogById = async (id: string) => {
-    const dogs = await getDogs();
-    return dogs.find(dog => dog.id === id);
+export const getDogs = async (): Promise<Dog[]> => {
+  const dogsCol = collection(db, 'dogs');
+  const dogsSnapshot = await getDocs(dogsCol);
+  const dogsList = dogsSnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as Dog[];
+  return dogsList;
 };
+
+export const getDogById = async (id: string) => {
+    const dogDocRef = doc(db, 'dogs', id);
+    const dogSnap = await getDoc(dogDocRef);
+    if(dogSnap.exists()) {
+        return convertTimestamps({ id: dogSnap.id, ...dogSnap.data() }) as Dog;
+    }
+    return undefined;
+};
+
 export const addDog = async (dog: Omit<Dog, 'id' | 'status' | 'avatar'>) => {
-  const dogs = await getDogs();
-  const newDog: Dog = { ...dog, id: String(Date.now()), status: 'Disponível', avatar: `https://placehold.co/40x40.png?text=${dog.name.charAt(0)}` };
-  const updatedDogs = [...dogs, newDog];
-  writeData(dogsFilePath, updatedDogs);
+  const newDog = { 
+    ...dog, 
+    status: 'Disponível', 
+    avatar: `https://placehold.co/40x40.png?text=${dog.name.charAt(0)}` 
+  };
+  const dogsCol = collection(db, 'dogs');
+  const docRef = await addDoc(dogsCol, newDog);
   revalidatePath('/dogs');
   revalidatePath('/dashboard');
-  return newDog;
+  return { id: docRef.id, ...newDog };
 };
+
 export const updateDog = async (updatedDog: Omit<Dog, 'id'> & { id: string }) => {
-    const dogs = await getDogs();
-    const index = dogs.findIndex(dog => dog.id === updatedDog.id);
-    if(index !== -1) {
-        dogs[index] = { ...dogs[index], ...updatedDog };
-        writeData(dogsFilePath, dogs);
-        revalidatePath('/dogs');
-        revalidatePath(`/dogs/${updatedDog.id}`);
-        revalidatePath(`/dogs/${updatedDog.id}/edit`);
-        revalidatePath('/dashboard');
-        return dogs[index];
-    }
-    return null;
+    const dogDocRef = doc(db, 'dogs', updatedDog.id);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...dogData } = updatedDog;
+    await updateDoc(dogDocRef, dogData);
+    revalidatePath('/dogs');
+    revalidatePath(`/dogs/${updatedDog.id}`);
+    revalidatePath(`/dogs/${updatedDog.id}/edit`);
+    revalidatePath('/dashboard');
+    return updatedDog;
 }
+
 export const deleteDog = async (id: string) => {
-    let dogs = await getDogs();
-    let expenses = await getExpenses();
-    let sales = await getSales();
-    writeData(dogsFilePath, dogs.filter(dog => dog.id !== id));
-    writeData(expensesFilePath, expenses.filter(expense => expense.dogId !== id));
-    writeData(salesFilePath, sales.filter(sale => sale.dogId !== id));
+    const batch = writeBatch(db);
+
+    // Delete the dog document
+    const dogDocRef = doc(db, 'dogs', id);
+    batch.delete(dogDocRef);
+
+    // Delete related expenses
+    const expensesQuery = query(collection(db, 'expenses'), where('dogId', '==', id));
+    const expensesSnapshot = await getDocs(expensesQuery);
+    expensesSnapshot.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    // Delete related sales
+    const salesQuery = query(collection(db, 'sales'), where('dogId', '==', id));
+    const salesSnapshot = await getDocs(salesQuery);
+    salesSnapshot.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+
     revalidatePath('/dogs');
     revalidatePath('/dashboard');
 };
+
 export const recordSale = async (sale: Omit<Sale, 'id'>) => {
     const dog = await getDogById(sale.dogId);
     if (dog) {
@@ -96,8 +109,8 @@ export const recordSale = async (sale: Omit<Sale, 'id'>) => {
             dateOfSale: sale.date,
         }
         await updateDog(updatedDog);
-        const sales = await getSales();
-        writeData(salesFilePath, [...sales, sale]);
+        const salesCol = collection(db, 'sales');
+        await addDoc(salesCol, sale);
         revalidatePath('/dashboard');
         revalidatePath('/dogs');
         revalidatePath('/sales');
@@ -106,73 +119,93 @@ export const recordSale = async (sale: Omit<Sale, 'id'>) => {
 
 
 // Tutors
-export const getTutors = async (): Promise<Tutor[]> => readData<Tutor>(tutorsFilePath, []);
-export const getTutorById = async (id: string) => {
-    const tutors = await getTutors();
-    return tutors.find(tutor => tutor.id === id)
+export const getTutors = async (): Promise<Tutor[]> => {
+  const tutorsCol = collection(db, 'tutors');
+  const tutorsSnapshot = await getDocs(tutorsCol);
+  return tutorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Tutor[];
 };
+
+export const getTutorById = async (id: string) => {
+    const tutorDocRef = doc(db, 'tutors', id);
+    const tutorSnap = await getDoc(tutorDocRef);
+    return tutorSnap.exists() ? { id: tutorSnap.id, ...tutorSnap.data() } as Tutor : undefined;
+};
+
 export const addTutor = async (tutor: Omit<Tutor, 'id' | 'avatar'>) => {
-    const tutors = await getTutors();
-    const newTutor: Tutor = { ...tutor, id: String(Date.now()), avatar: 'https://placehold.co/40x40.png' };
-    writeData(tutorsFilePath, [...tutors, newTutor]);
+    const newTutor = { ...tutor, avatar: 'https://placehold.co/40x40.png' };
+    const tutorsCol = collection(db, 'tutors');
+    const docRef = await addDoc(tutorsCol, newTutor);
     revalidatePath('/tutors');
     revalidatePath('/dashboard');
-    return newTutor;
+    return { id: docRef.id, ...newTutor };
 };
+
 export const updateTutor = async (updatedTutor: Tutor) => {
-    const tutors = await getTutors();
-    const index = tutors.findIndex(tutor => tutor.id === updatedTutor.id);
-    if(index !== -1) {
-        tutors[index] = updatedTutor;
-        writeData(tutorsFilePath, tutors);
-        revalidatePath('/tutors');
-        revalidatePath(`/tutors/${updatedTutor.id}/edit`);
-        return tutors[index];
-    }
-    return null;
+    const tutorDocRef = doc(db, 'tutors', updatedTutor.id);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, ...tutorData } = updatedTutor;
+    await updateDoc(tutorDocRef, tutorData);
+    revalidatePath('/tutors');
+    revalidatePath(`/tutors/${updatedTutor.id}/edit`);
+    return updatedTutor;
 };
+
 export const deleteTutor = async (id: string) => {
-    const tutors = await getTutors();
-    writeData(tutorsFilePath, tutors.filter(tutor => tutor.id !== id));
-    const dogs = await getDogs();
-    const updatedDogs = dogs.map(dog => {
-        if (dog.tutorId === id) {
-            return { ...dog, tutorId: undefined };
-        }
-        return dog;
-    })
-    writeData(dogsFilePath, updatedDogs);
+    await deleteDoc(doc(db, 'tutors', id));
+    // Also clear tutorId from any dogs that might be associated
+    const dogsQuery = query(collection(db, 'dogs'), where('tutorId', '==', id));
+    const dogsSnapshot = await getDocs(dogsQuery);
+    const batch = writeBatch(db);
+    dogsSnapshot.forEach(doc => {
+        batch.update(doc.ref, { tutorId: '' }); // or delete field
+    });
+    await batch.commit();
+
     revalidatePath('/tutors');
     revalidatePath('/dogs');
 };
 
 // Expenses
-export const getExpenses = async (): Promise<Expense[]> => readData<Expense>(expensesFilePath, []);
-export const getExpensesByDogId = async (dogId: string) => {
-    const expenses = await getExpenses();
-    return expenses.filter(e => e.dogId === dogId)
+export const getExpenses = async (): Promise<Expense[]> => {
+    const expensesCol = collection(db, 'expenses');
+    const expensesSnapshot = await getDocs(expensesCol);
+    return expensesSnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as Expense[];
 };
+
+export const getExpensesByDogId = async (dogId: string) => {
+    const expensesQuery = query(collection(db, 'expenses'), where('dogId', '==', dogId));
+    const expensesSnapshot = await getDocs(expensesQuery);
+    return expensesSnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as Expense[];
+};
+
 export const addExpense = async (expense: Omit<Expense, 'id'>) => {
-    const expenses = await getExpenses();
-    const newExpense = { ...expense, id: String(Date.now()) };
-    writeData(expensesFilePath, [...expenses, newExpense]);
+    const expensesCol = collection(db, 'expenses');
+    const docRef = await addDoc(expensesCol, expense);
     revalidatePath('/dashboard');
     revalidatePath('/expenses');
     revalidatePath(`/dogs/${expense.dogId}`);
-    return newExpense;
+    return { id: docRef.id, ...expense };
 }
 
 // General Expenses
-export const getGeneralExpenses = async (): Promise<GeneralExpense[]> => readData<GeneralExpense>(generalExpensesFilePath, []);
+export const getGeneralExpenses = async (): Promise<GeneralExpense[]> => {
+    const expensesCol = collection(db, 'generalExpenses');
+    const expensesSnapshot = await getDocs(expensesCol);
+    return expensesSnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as GeneralExpense[];
+};
+
 export const addGeneralExpense = async (expense: Omit<GeneralExpense, 'id'>) => {
-    const expenses = await getGeneralExpenses();
-    const newExpense = { ...expense, id: String(Date.now()) };
-    writeData(generalExpensesFilePath, [...expenses, newExpense]);
+    const expensesCol = collection(db, 'generalExpenses');
+    const docRef = await addDoc(expensesCol, expense);
     revalidatePath('/dashboard');
     revalidatePath('/general-expenses');
-    return newExpense;
+    return { id: docRef.id, ...expense };
 }
 
 
 // Sales
-export const getSales = async (): Promise<Sale[]> => readData<Sale>(salesFilePath, []);
+export const getSales = async (): Promise<Sale[]> => {
+    const salesCol = collection(db, 'sales');
+    const salesSnapshot = await getDocs(salesCol);
+    return salesSnapshot.docs.map(doc => convertTimestamps({ ...doc.data() })) as Sale[];
+};
