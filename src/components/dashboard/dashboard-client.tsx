@@ -7,8 +7,6 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-  ChartLegend,
-  ChartLegendContent,
 } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import type { Dog, Tutor, Sale } from '@/lib/types';
@@ -162,8 +160,8 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
           </div>
         </CardHeader>
         <CardContent className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
+          <ChartContainer config={chartConfig} className="w-full h-full">
+            <BarChart accessibilityLayer data={chartData}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
               <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value}`} />
@@ -173,7 +171,7 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
               />
               <Bar dataKey="revenue" fill="var(--color-revenue)" radius={4} />
             </BarChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </CardContent>
       </Card>
     </>
