@@ -7,7 +7,7 @@ export default async function ExpensesPage() {
   return (
     <div className="flex flex-col gap-8">
        <div>
-          <h1 className="text-3xl font-bold font-headline">Registrar uma Despesa</h1>
+          <h1 className="text-3xl font-bold font-headline">Registrar Despesa para um Cão</h1>
           <p className="text-muted-foreground">
             Selecione um cão para registrar uma nova despesa.
           </p>

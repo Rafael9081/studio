@@ -9,7 +9,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Legend } from 'recharts';
-import type { Dog as DogType, Tutor, Sale, Expense } from '@/lib/types';
+import type { Dog as DogType, Tutor, Sale, Expense, GeneralExpense } from '@/lib/types';
 import { addDays, format } from "date-fns"
 import { ptBR } from 'date-fns/locale';
 import { DateRange } from "react-day-picker"
@@ -27,7 +27,7 @@ interface DashboardClientProps {
   dogs: DogType[];
   tutors: Tutor[];
   sales: Sale[];
-  expenses: Expense[];
+  expenses: (Expense | GeneralExpense)[];
 }
 
 export default function DashboardClient({ dogs, tutors, sales, expenses }: DashboardClientProps) {

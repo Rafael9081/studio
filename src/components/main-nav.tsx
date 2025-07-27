@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Dog, LayoutDashboard, Users, DollarSign, Wallet } from 'lucide-react';
+import { Dog, LayoutDashboard, Users, DollarSign, Wallet, Briefcase } from 'lucide-react';
 
 import {
   SidebarMenu,
@@ -15,7 +15,8 @@ const navItems = [
   { href: '/dogs', icon: Dog, label: 'Cães' },
   { href: '/tutors', icon: Users, label: 'Tutores' },
   { href: '/sales', icon: DollarSign, label: 'Vendas' },
-  { href: '/expenses', icon: Wallet, label: 'Despesas' },
+  { href: '/expenses', icon: Wallet, label: 'Despesas Cães' },
+  { href: '/general-expenses', icon: Briefcase, label: 'Despesas Gerais' },
 ];
 
 export default function MainNav() {

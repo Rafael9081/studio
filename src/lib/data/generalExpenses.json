@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "type": "Serviços",
+    "description": "Conta de luz",
+    "amount": 150,
+    "date": "2024-06-15T00:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "type": "Funcionários",
+    "description": "Salário João",
+    "amount": 1500,
+    "date": "2024-07-05T00:00:00.000Z"
+  }
+]

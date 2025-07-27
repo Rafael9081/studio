@@ -31,6 +31,14 @@ export type Expense = {
   description: string;
 };
 
+export type GeneralExpense = {
+  id: string;
+  type: 'Material' | 'Serviços' | 'Funcionários' | 'Outras';
+  description: string;
+  amount: number;
+  date: Date;
+};
+
 export type Sale = {
   dogId: string;
   tutorId: string;

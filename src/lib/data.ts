@@ -1,6 +1,6 @@
 'use server';
 
-import { type Dog, type Tutor, type Expense, type Sale } from './types';
+import { type Dog, type Tutor, type Expense, type Sale, type GeneralExpense } from './types';
 import { revalidatePath } from 'next/cache';
 import fs from 'fs';
 import path from 'path';
@@ -9,6 +9,7 @@ const dataDir = path.join(process.cwd(), 'src', 'lib', 'data');
 const dogsFilePath = path.join(dataDir, 'dogs.json');
 const tutorsFilePath = path.join(dataDir, 'tutors.json');
 const expensesFilePath = path.join(dataDir, 'expenses.json');
+const generalExpensesFilePath = path.join(dataDir, 'generalExpenses.json');
 const salesFilePath = path.join(dataDir, 'sales.json');
 
 
@@ -23,7 +24,13 @@ const readData = <T>(filePath: string, defaultData: T[] = []): T[] => {
       return defaultData;
     }
     const data = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(data);
+    // For dates, we need to convert them back to Date objects
+    return JSON.parse(data, (key, value) => {
+      if (key.endsWith('Date') || key === 'date' || key === 'dateOfSale' || key === 'birthDate') {
+        if (value) return new Date(value);
+      }
+      return value;
+    });
   } catch (error) {
     console.error(`Error reading from ${filePath}:`, error);
     return defaultData;
@@ -40,13 +47,7 @@ const writeData = (filePath: string, data: any) => {
 };
 
 // Dogs
-export const getDogs = async (): Promise<Dog[]> => readData<Dog>(dogsFilePath, [
-  { id: '1', name: 'Buddy', breed: 'Golden Retriever', sex: 'Macho', status: 'Disponível', avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2023-01-15'), observations: 'Muito brincalhão e amigável.' },
-  { id: '2', name: 'Lucy', breed: 'Labrador', sex: 'Fêmea', status: 'Disponível', avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2023-03-20'), specialCharacteristics: 'Pelagem cor de chocolate.' },
-  { id: '3', name: 'Max', breed: 'Pastor Alemão', sex: 'Macho', status: 'Vendido', tutorId: '1', salePrice: 1200, dateOfSale: new Date('2024-05-15'), avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2022-11-10'), fatherId: '1', motherId: '2' },
-  { id: '4', name: 'Daisy', breed: 'Beagle', sex: 'Fêmea', status: 'Disponível', avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2023-08-01') },
-  { id: '5', name: 'Charlie', breed: 'Poodle', sex: 'Macho', status: 'Vendido', tutorId: '2', salePrice: 1500, dateOfSale: new Date('2024-06-01'), avatar: 'https://placehold.co/40x40.png', birthDate: new Date('2023-05-25') },
-]);
+export const getDogs = async (): Promise<Dog[]> => readData<Dog>(dogsFilePath, []);
 export const getDogById = async (id: string) => {
     const dogs = await getDogs();
     return dogs.find(dog => dog.id === id);
@@ -87,11 +88,14 @@ export const deleteDog = async (id: string) => {
 export const recordSale = async (sale: Omit<Sale, 'id'>) => {
     const dog = await getDogById(sale.dogId);
     if (dog) {
-        dog.status = 'Vendido';
-        dog.tutorId = sale.tutorId;
-        dog.salePrice = sale.price;
-        dog.dateOfSale = sale.date;
-        await updateDog(dog);
+        const updatedDog: Dog = {
+            ...dog,
+            status: 'Vendido',
+            tutorId: sale.tutorId,
+            salePrice: sale.price,
+            dateOfSale: sale.date,
+        }
+        await updateDog(updatedDog);
         const sales = await getSales();
         writeData(salesFilePath, [...sales, sale]);
         revalidatePath('/dashboard');
@@ -102,11 +106,7 @@ export const recordSale = async (sale: Omit<Sale, 'id'>) => {
 
 
 // Tutors
-export const getTutors = async (): Promise<Tutor[]> => readData<Tutor>(tutorsFilePath, [
-    { id: '1', name: 'João da Silva', phone: '123-456-7890', avatar: 'https://placehold.co/40x40.png' },
-    { id: '2', name: 'Maria Souza', phone: '098-765-4321', avatar: 'https://placehold.co/40x40.png' },
-    { id: '3', name: 'Pedro Jones', phone: '555-555-5555', avatar: 'https://placehold.co/40x40.png' },
-]);
+export const getTutors = async (): Promise<Tutor[]> => readData<Tutor>(tutorsFilePath, []);
 export const getTutorById = async (id: string) => {
     const tutors = await getTutors();
     return tutors.find(tutor => tutor.id === id)
@@ -147,13 +147,7 @@ export const deleteTutor = async (id: string) => {
 };
 
 // Expenses
-export const getExpenses = async (): Promise<Expense[]> => readData<Expense>(expensesFilePath, [
-    {id: '1', dogId: '1', type: 'Alimentação', amount: 50, date: new Date('2024-06-05'), description: 'Ração premium'},
-    {id: '2', dogId: '1', type: 'Vacinas', amount: 120, date: new Date('2024-06-10'), description: 'Vacinas anuais'},
-    {id: '3', dogId: '2', type: 'Veterinário', amount: 75, date: new Date('2024-06-12'), description: 'Tratamento de pulgas'},
-    {id: '4', dogId: '3', type: 'Geral', amount: 30, date: new Date('2024-05-10'), description: 'Coleira e guia novas'},
-    {id: '5', dogId: '1', type: 'Veterinário', amount: 200, date: new Date('2024-07-01'), description: 'Consulta de rotina'},
-]);
+export const getExpenses = async (): Promise<Expense[]> => readData<Expense>(expensesFilePath, []);
 export const getExpensesByDogId = async (dogId: string) => {
     const expenses = await getExpenses();
     return expenses.filter(e => e.dogId === dogId)
@@ -164,11 +158,21 @@ export const addExpense = async (expense: Omit<Expense, 'id'>) => {
     writeData(expensesFilePath, [...expenses, newExpense]);
     revalidatePath('/dashboard');
     revalidatePath('/expenses');
+    revalidatePath(`/dogs/${expense.dogId}`);
     return newExpense;
 }
 
+// General Expenses
+export const getGeneralExpenses = async (): Promise<GeneralExpense[]> => readData<GeneralExpense>(generalExpensesFilePath, []);
+export const addGeneralExpense = async (expense: Omit<GeneralExpense, 'id'>) => {
+    const expenses = await getGeneralExpenses();
+    const newExpense = { ...expense, id: String(Date.now()) };
+    writeData(generalExpensesFilePath, [...expenses, newExpense]);
+    revalidatePath('/dashboard');
+    revalidatePath('/general-expenses');
+    return newExpense;
+}
+
+
 // Sales
-export const getSales = async (): Promise<Sale[]> => readData<Sale>(salesFilePath, [
-    { dogId: '3', tutorId: '1', price: 1200, date: new Date('2024-05-15') },
-    { dogId: '5', tutorId: '2', price: 1500, date: new Date('2024-06-01') },
-]);
+export const getSales = async (): Promise<Sale[]> => readData<Sale>(salesFilePath, []);

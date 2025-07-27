@@ -1,11 +1,14 @@
 import DashboardClient from "@/components/dashboard/dashboard-client";
-import { getDogs, getSales, getTutors, getExpenses } from "@/lib/data";
+import { getDogs, getSales, getTutors, getExpenses, getGeneralExpenses } from "@/lib/data";
 
 export default async function DashboardPage() {
   const dogs = await getDogs();
   const tutors = await getTutors();
   const sales = await getSales();
-  const expenses = await getExpenses();
+  const dogExpenses = await getExpenses();
+  const generalExpenses = await getGeneralExpenses();
+
+  const allExpenses = [...dogExpenses, ...generalExpenses];
   
   return (
     <div className="flex flex-col gap-8">
@@ -15,7 +18,7 @@ export default async function DashboardPage() {
           Bem-vindo ao seu gerenciador de canil. Aqui está um resumo de suas operações.
         </p>
       </div>
-      <DashboardClient dogs={dogs} tutors={tutors} sales={sales} expenses={expenses} />
+      <DashboardClient dogs={dogs} tutors={tutors} sales={sales} expenses={allExpenses} />
     </div>
   );
 }
