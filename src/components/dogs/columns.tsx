@@ -22,6 +22,10 @@ import { useToast } from '@/hooks/use-toast';
 
 export const columns: ColumnDef<Dog>[] = [
   {
+    accessorKey: 'id',
+    header: 'ID',
+  },
+  {
     accessorKey: 'name',
     header: 'Nome',
     cell: ({ row }) => {

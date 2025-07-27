@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "dogId": "1",
+    "type": "Alimentação",
+    "amount": 50,
+    "date": "2024-06-05T00:00:00.000Z",
+    "description": "Ração premium"
+  },
+  {
+    "id": "2",
+    "dogId": "1",
+    "type": "Vacinas",
+    "amount": 120,
+    "date": "2024-06-10T00:00:00.000Z",
+    "description": "Vacinas anuais"
+  },
+  {
+    "id": "3",
+    "dogId": "2",
+    "type": "Veterinário",
+    "amount": 75,
+    "date": "2024-06-12T00:00:00.000Z",
+    "description": "Tratamento de pulgas"
+  },
+  {
+    "id": "4",
+    "dogId": "3",
+    "type": "Geral",
+    "amount": 30,
+    "date": "2024-05-10T00:00:00.000Z",
+    "description": "Coleira e guia novas"
+  },
+  {
+    "id": "5",
+    "dogId": "1",
+    "type": "Veterinário",
+    "amount": 200,
+    "date": "2024-07-01T00:00:00.000Z",
+    "description": "Consulta de rotina"
+  }
+]
