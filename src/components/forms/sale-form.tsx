@@ -58,9 +58,9 @@ export default function SaleForm({ dogs, tutors }: SaleFormProps) {
         });
         toast({
             title: "Sucesso!",
-            description: "Venda registrada com sucesso.",
+            description: "Venda registrada com sucesso. Você será redirecionado para o relatório financeiro.",
         });
-        router.push('/dashboard');
+        router.push(`/dogs/${values.dogId}/financials`);
         router.refresh();
     } catch (error) {
         toast({
