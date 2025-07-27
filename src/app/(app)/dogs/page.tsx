@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { DogsDataTable } from "@/components/dogs/data-table";
 import { columns } from "@/components/dogs/columns";
 
-export default function DogsPage() {
-  const dogs = getDogs();
+export default async function DogsPage() {
+  const dogs = await getDogs();
 
   return (
     <div className="flex flex-col gap-8">
