@@ -5,9 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
-import { format } from "date-fns"
-import { ptBR } from "date-fns/locale"
-import { CalendarIcon, Upload, X } from "lucide-react"
+import { Upload, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -31,9 +29,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import type { Dog } from "@/lib/types"
 import { addDog, updateDog } from "@/lib/data"
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover"
-import { Calendar } from "../ui/calendar"
-import { cn } from "@/lib/utils"
 import { Textarea } from "../ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
@@ -231,48 +226,24 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                 </FormItem>
                             )}
                         />
-                         <FormField
-                          control={form.control}
-                          name="birthDate"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                              <FormLabel>Data de Nascimento</FormLabel>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button
-                                      variant={"outline"}
-                                      className={cn(
-                                        "pl-3 text-left font-normal",
-                                        !field.value && "text-muted-foreground"
-                                      )}
-                                      disabled={isSubmitting}
-                                    >
-                                      {field.value ? (
-                                        format(field.value, "PPP", { locale: ptBR})
-                                      ) : (
-                                        <span>Escolha uma data</span>
-                                      )}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                  <Calendar
-                                    mode="single"
-                                    selected={field.value}
-                                    onSelect={field.onChange}
-                                    disabled={(date) =>
-                                      date > new Date() || date < new Date("1900-01-01")
-                                    }
-                                    initialFocus
-                                    locale={ptBR}
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                        <FormField
+                            control={form.control}
+                            name="birthDate"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Data de Nascimento</FormLabel>
+                                    <FormControl>
+                                        <Input 
+                                            type="date" 
+                                            {...field} 
+                                            value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} 
+                                            onChange={(e) => field.onChange(e.target.valueAsDate)} 
+                                            disabled={isSubmitting} 
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
                          <FormField
                             control={form.control}
