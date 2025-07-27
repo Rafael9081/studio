@@ -1,6 +1,6 @@
 'use server';
 
-import { type Dog, type Tutor, type Expense, type Sale, type GeneralExpense } from './types';
+import { type Dog, type Tutor, type Expense, type Sale, type GeneralExpense, type Activity } from './types';
 import { type LitterData, type PuppyData } from '@/components/forms/litter-form';
 import { revalidatePath } from 'next/cache';
 import { db, storage } from './firebase/config';
@@ -15,7 +15,9 @@ import {
   Timestamp,
   query,
   where,
-  writeBatch
+  writeBatch,
+  orderBy,
+  limit
 } from 'firebase/firestore';
 import { 
   ref as storageRef, 
@@ -80,6 +82,19 @@ export const addDog = async (dog: Omit<Dog, 'id' | 'status'>) => {
   }
   
   await updateDoc(docRef, { avatar: avatarUrl });
+
+  // Add to recent activity
+  const activityCol = collection(db, 'activity');
+  await addDoc(activityCol, {
+    type: 'dog_added',
+    title: `Novo Cão: ${dog.name}`,
+    description: `Raça: ${dog.breed}`,
+    link: `/dogs/${docRef.id}`,
+    date: new Date(),
+    avatarUrl,
+    entityId: docRef.id
+  });
+
 
   revalidatePath('/dogs');
   revalidatePath('/dashboard');
@@ -163,7 +178,22 @@ export const recordSale = async (sale: Omit<Sale, 'id'>) => {
         await updateDoc(dogDocRef, updatedDogData);
 
         const salesCol = collection(db, 'sales');
-        await addDoc(salesCol, sale);
+        const saleDocRef = await addDoc(salesCol, sale);
+
+        // Add to recent activity
+        const tutor = await getTutorById(sale.tutorId);
+        const activityCol = collection(db, 'activity');
+        await addDoc(activityCol, {
+            type: 'sale_added',
+            title: `Venda: ${dog.name}`,
+            description: `Vendido para ${tutor?.name}`,
+            link: `/dogs/${dog.id}/financials`,
+            date: sale.date,
+            avatarUrl: dog.avatar,
+            amount: sale.price,
+            entityId: saleDocRef.id
+        });
+
         revalidatePath('/dashboard');
         revalidatePath('/dogs');
         revalidatePath('/sales');
@@ -234,6 +264,21 @@ export const getExpensesByDogId = async (dogId: string) => {
 export const addExpense = async (expense: Omit<Expense, 'id'>) => {
     const expensesCol = collection(db, 'expenses');
     const docRef = await addDoc(expensesCol, expense);
+
+    // Add to recent activity
+    const dog = await getDogById(expense.dogId);
+    const activityCol = collection(db, 'activity');
+    await addDoc(activityCol, {
+        type: 'expense_added',
+        title: `Despesa: ${dog?.name}`,
+        description: `${expense.type} - ${expense.description}`,
+        link: `/dogs/${expense.dogId}`,
+        date: expense.date,
+        avatarUrl: dog?.avatar,
+        amount: expense.amount,
+        entityId: docRef.id
+    });
+
     revalidatePath('/dashboard');
     revalidatePath('/expenses');
     revalidatePath(`/dogs/${expense.dogId}`);
@@ -265,58 +310,29 @@ export const getSales = async (): Promise<Sale[]> => {
 
 // Litters
 export const addLitter = async (litter: Omit<LitterData, 'puppies'> & { puppies: PuppyData[] }) => {
-    const batch = writeBatch(db);
-    const dogsCol = collection(db, 'dogs');
-
+    
     for (const puppy of litter.puppies) {
-        const newDogRef = doc(dogsCol); // Create a new document reference with an auto-generated ID
-
-        const { avatar, ...puppyData } = puppy;
-
-        const newDogPayload: Omit<Dog, 'id'> = {
-            ...puppyData,
+        // We call addDog for each puppy to trigger the recent activity logic
+        await addDog({
+            name: puppy.name,
+            sex: puppy.sex,
+            avatar: puppy.avatar,
             breed: litter.breed,
             birthDate: litter.birthDate,
             fatherId: litter.fatherId,
             motherId: litter.motherId,
-            status: 'Disponível',
-            avatar: '', // Placeholder, will be updated
-        };
-
-        // Set the document data first (without avatar)
-        batch.set(newDogRef, newDogPayload);
+        })
     }
-
-    await batch.commit();
-
-    // Now, let's handle the image uploads.
-    // A better approach for production would be to trigger a cloud function
-    // on document creation to handle image processing and updating.
-    // For now, we'll re-fetch the newly created dogs to get their IDs.
-     const newDogsQuery = query(
-        dogsCol,
-        where('motherId', '==', litter.motherId),
-        where('birthDate', '==', litter.birthDate),
-        litter.fatherId ? where('fatherId', '==', litter.fatherId) : where('fatherId', 'in', [null, undefined, ""])
-    );
-
-    const newDogsSnapshot = await getDocs(newDogsQuery);
-
-    await Promise.all(newDogsSnapshot.docs.map(async (dogDoc) => {
-        const dogData = dogDoc.data() as Dog;
-        const correspondingPuppy = litter.puppies.find(p => p.name === dogData.name && p.sex === dogData.sex);
-
-        if (correspondingPuppy?.avatar) {
-            const avatarUrl = await uploadImage(correspondingPuppy.avatar, dogDoc.id);
-            await updateDoc(doc(db, 'dogs', dogDoc.id), { avatar: avatarUrl });
-        } else {
-            const avatarUrl = `https://placehold.co/40x40.png?text=${dogData.name.charAt(0)}`;
-            await updateDoc(doc(db, 'dogs', dogDoc.id), { avatar: avatarUrl });
-        }
-    }));
-
-
+    
     revalidatePath('/dogs');
     revalidatePath('/dashboard');
     revalidatePath('/litters');
 };
+
+// Activity Feed
+export const getRecentActivity = async (count = 10): Promise<Activity[]> => {
+  const activityCol = collection(db, 'activity');
+  const q = query(activityCol, orderBy('date', 'desc'), limit(count));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as Activity[];
+}

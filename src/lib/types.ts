@@ -46,3 +46,15 @@ export type Sale = {
   price: number;
   date: Date;
 };
+
+export type Activity = {
+    id: string;
+    type: 'dog_added' | 'sale_added' | 'expense_added';
+    title: string;
+    description: string;
+    date: Date;
+    link: string;
+    avatarUrl?: string;
+    amount?: number;
+    entityId: string;
+}
