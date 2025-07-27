@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Edit } from "lucide-react";
+import { ArrowLeft, Edit, GitBranch } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -17,7 +17,15 @@ function calculateAge(birthDate: Date) {
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
     }
-    return age > 0 ? `${age} anos` : `${m} meses`;
+    const yearsText = age > 1 ? "anos" : "ano";
+    const months = m < 0 ? 12 + m : m;
+    const monthsText = months > 1 ? "meses" : "mês";
+
+    if (age > 0) {
+        return `${age} ${yearsText}`;
+    } else {
+        return `${months} ${monthsText}`;
+    }
 }
 
 export default async function DogDetailsPage({ params }: { params: { id: string } }) {
@@ -43,16 +51,24 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
         <Button variant="outline" asChild>
             <Link href="/dogs">
                 <ArrowLeft className="mr-2" />
-                Voltar para a Lista
+                Voltar
             </Link>
         </Button>
         <h1 className="text-3xl font-bold font-headline text-center">{dog.name}</h1>
-        <Button asChild>
-            <Link href={`/dogs/${dog.id}/edit`}>
-                <Edit className="mr-2" />
-                Editar
-            </Link>
-        </Button>
+        <div className="flex gap-2">
+            <Button asChild variant="outline">
+                <Link href={`/dogs/${dog.id}/ancestry`}>
+                    <GitBranch className="mr-2" />
+                    Genealogia
+                </Link>
+            </Button>
+            <Button asChild>
+                <Link href={`/dogs/${dog.id}/edit`}>
+                    <Edit className="mr-2" />
+                    Editar
+                </Link>
+            </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -114,16 +130,18 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                 </CardContent>
             </Card>
 
-             {dog.status === 'Vendido' && tutor && (
+             {dog.status === 'Vendido' && (
                 <Card>
                     <CardHeader>
                         <CardTitle>Informações da Venda</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                        <div className="flex justify-between">
-                            <span className="font-semibold">Tutor:</span>
-                            <span>{tutor.name}</span>
-                        </div>
+                    <CardContent className="space-y-4">
+                        {tutor && (
+                             <div className="flex justify-between">
+                                <span className="font-semibold">Tutor:</span>
+                                <span>{tutor.name}</span>
+                            </div>
+                        )}
                         <div className="flex justify-between">
                             <span className="font-semibold">Preço da Venda:</span>
                             <span>{dog.salePrice?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
@@ -132,6 +150,11 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                             <span className="font-semibold">Data da Venda:</span>
                             <span>{dog.dateOfSale ? format(new Date(dog.dateOfSale), 'dd/MM/yyyy') : 'N/A'}</span>
                         </div>
+                         <Button asChild className="w-full">
+                            <Link href={`/dogs/${dog.id}/financials`}>
+                                Ver Relatório Financeiro
+                            </Link>
+                        </Button>
                     </CardContent>
                 </Card>
             )}
