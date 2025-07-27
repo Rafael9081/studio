@@ -2,7 +2,7 @@
 
 import { type Dog, type Tutor, type Expense, type Sale, type GeneralExpense } from './types';
 import { revalidatePath } from 'next/cache';
-import { db } from './firebase/config';
+import { db, storage } from './firebase/config';
 import { 
   collection, 
   getDocs, 
@@ -16,6 +16,12 @@ import {
   where,
   writeBatch
 } from 'firebase/firestore';
+import { 
+  ref as storageRef, 
+  uploadString, 
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 
 // Helper to convert Firestore Timestamps to JS Date objects
 const convertTimestamps = (data: any) => {
@@ -28,6 +34,17 @@ const convertTimestamps = (data: any) => {
   return data;
 };
 
+// Helper to upload image and get URL
+const uploadImage = async (file: string, dogId: string): Promise<string> => {
+    if (!file.startsWith('data:image')) {
+        // Not a new base64 image, return as is (might be existing URL)
+        return file;
+    }
+    const imageRef = storageRef(storage, `dogs/${dogId}/${new Date().getTime()}`);
+    const snapshot = await uploadString(imageRef, file, 'data_url');
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
+}
 
 // Dogs
 export const getDogs = async (): Promise<Dog[]> => {
@@ -46,36 +63,51 @@ export const getDogById = async (id: string) => {
     return undefined;
 };
 
-export const addDog = async (dog: Omit<Dog, 'id' | 'status' | 'avatar'>) => {
-  const newDog = { 
-    ...dog, 
+export const addDog = async (dog: Omit<Dog, 'id' | 'status'>) => {
+  const { avatar, ...dogData } = dog;
+  const newDogPayload = { 
+    ...dogData, 
     status: 'Disponível', 
-    avatar: `https://placehold.co/40x40.png?text=${dog.name.charAt(0)}` 
+    avatar: '' // Will be updated after getting the ID
   };
   const dogsCol = collection(db, 'dogs');
-  const docRef = await addDoc(dogsCol, newDog);
+  const docRef = await addDoc(dogsCol, newDogPayload);
+
+  let avatarUrl = `https://placehold.co/40x40.png?text=${dog.name.charAt(0)}`;
+  if (avatar) {
+      avatarUrl = await uploadImage(avatar, docRef.id);
+  }
+  
+  await updateDoc(docRef, { avatar: avatarUrl });
+
   revalidatePath('/dogs');
   revalidatePath('/dashboard');
-  return { id: docRef.id, ...newDog };
+  return { id: docRef.id, ...newDogPayload, avatar: avatarUrl };
 };
 
 export const updateDog = async (updatedDog: Omit<Dog, 'id'> & { id: string }) => {
-    const dogDocRef = doc(db, 'dogs', updatedDog.id);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id, ...dogData } = updatedDog;
+    const { id, avatar, ...dogData } = updatedDog;
+    const dogDocRef = doc(db, 'dogs', id);
+
+    if (avatar) {
+        const newAvatarUrl = await uploadImage(avatar, id);
+        dogData.avatar = newAvatarUrl;
+    }
+
     await updateDoc(dogDocRef, dogData);
     revalidatePath('/dogs');
-    revalidatePath(`/dogs/${updatedDog.id}`);
-    revalidatePath(`/dogs/${updatedDog.id}/edit`);
+    revalidatePath(`/dogs/${id}`);
+    revalidatePath(`/dogs/${id}/edit`);
     revalidatePath('/dashboard');
-    return updatedDog;
+    return { id, ...dogData };
 }
 
 export const deleteDog = async (id: string) => {
     const batch = writeBatch(db);
+    const dogDocRef = doc(db, 'dogs', id);
+    const dog = await getDogById(id);
 
     // Delete the dog document
-    const dogDocRef = doc(db, 'dogs', id);
     batch.delete(dogDocRef);
 
     // Delete related expenses
@@ -91,6 +123,18 @@ export const deleteDog = async (id: string) => {
     salesSnapshot.forEach(doc => {
       batch.delete(doc.ref);
     });
+    
+    // Delete image from storage
+    if (dog?.avatar && dog.avatar.includes('firebasestorage')) {
+      try {
+        const imageRef = storageRef(storage, dog.avatar);
+        await deleteObject(imageRef);
+      } catch (error: any) {
+        if(error.code !== 'storage/object-not-found') {
+          console.error("Error deleting dog avatar:", error)
+        }
+      }
+    }
 
     await batch.commit();
 
@@ -101,14 +145,16 @@ export const deleteDog = async (id: string) => {
 export const recordSale = async (sale: Omit<Sale, 'id'>) => {
     const dog = await getDogById(sale.dogId);
     if (dog) {
-        const updatedDog: Dog = {
-            ...dog,
+        const updatedDogData: Partial<Dog> = {
             status: 'Vendido',
             tutorId: sale.tutorId,
             salePrice: sale.price,
             dateOfSale: sale.date,
         }
-        await updateDog(updatedDog);
+        
+        const dogDocRef = doc(db, 'dogs', dog.id);
+        await updateDoc(dogDocRef, updatedDogData);
+
         const salesCol = collection(db, 'sales');
         await addDoc(salesCol, sale);
         revalidatePath('/dashboard');
@@ -207,5 +253,5 @@ export const addGeneralExpense = async (expense: Omit<GeneralExpense, 'id'>) => 
 export const getSales = async (): Promise<Sale[]> => {
     const salesCol = collection(db, 'sales');
     const salesSnapshot = await getDocs(salesCol);
-    return salesSnapshot.docs.map(doc => convertTimestamps({ ...doc.data() })) as Sale[];
+    return salesSnapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as Sale[];
 };

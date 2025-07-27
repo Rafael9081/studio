@@ -7,7 +7,7 @@ export type Dog = {
   tutorId?: string;
   salePrice?: number;
   dateOfSale?: Date;
-  avatar?: string;
+  avatar?: string; // Can be a File object for upload or string URL
   birthDate?: Date;
   fatherId?: string;
   motherId?: string;
@@ -40,6 +40,7 @@ export type GeneralExpense = {
 };
 
 export type Sale = {
+  id: string;
   dogId: string;
   tutorId: string;
   price: number;
