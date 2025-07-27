@@ -1,10 +1,10 @@
 import DashboardClient from "@/components/dashboard/dashboard-client";
 import { getDogs, getSales, getTutors } from "@/lib/data";
 
-export default function DashboardPage() {
-  const dogs = getDogs();
-  const tutors = getTutors();
-  const sales = getSales();
+export default async function DashboardPage() {
+  const dogs = await getDogs();
+  const tutors = await getTutors();
+  const sales = await getSales();
   
   return (
     <div className="flex flex-col gap-8">
