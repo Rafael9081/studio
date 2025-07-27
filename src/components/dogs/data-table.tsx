@@ -41,7 +41,7 @@ export function DogsDataTable<TData, TValue>({
     <div className="rounded-lg border shadow-sm bg-card">
       <div className="p-4">
         <Input
-          placeholder="Filter by name..."
+          placeholder="Filtrar por nome..."
           value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
           onChange={(event) =>
             table.getColumn('name')?.setFilterValue(event.target.value)
@@ -85,7 +85,7 @@ export function DogsDataTable<TData, TValue>({
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                Nenhum resultado.
               </TableCell>
             </TableRow>
           )}
@@ -98,7 +98,7 @@ export function DogsDataTable<TData, TValue>({
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          Previous
+          Anterior
         </Button>
         <Button
           variant="outline"
@@ -106,7 +106,7 @@ export function DogsDataTable<TData, TValue>({
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          Next
+          Próximo
         </Button>
       </div>
     </div>

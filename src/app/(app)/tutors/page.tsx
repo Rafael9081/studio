@@ -13,15 +13,15 @@ export default function TutorsPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-headline">Manage Tutors</h1>
+          <h1 className="text-3xl font-bold font-headline">Gerenciar Tutores</h1>
           <p className="text-muted-foreground">
-            Add, edit, or delete tutor records.
+            Adicione, edite ou exclua registros de tutores.
           </p>
         </div>
         <Button asChild>
           <Link href="/tutors/new">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Tutor
+            Adicionar Tutor
           </Link>
         </Button>
       </div>

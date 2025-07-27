@@ -9,8 +9,9 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer } from 'recharts';
-import type { Dog, Tutor, Sale } from '@/lib/types';
+import type { Dog as DogType, Tutor, Sale } from '@/lib/types';
 import { addDays, format } from "date-fns"
+import { ptBR } from 'date-fns/locale';
 import { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/popover"
 
 interface DashboardClientProps {
-  dogs: Dog[];
+  dogs: DogType[];
   tutors: Tutor[];
   sales: Sale[];
 }
@@ -34,7 +35,7 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
     to: new Date(),
   })
 
-  const availableDogs = dogs.filter((dog) => dog.status === 'Available').length;
+  const availableDogs = dogs.filter((dog) => dog.status === 'Disponível').length;
   const totalTutors = tutors.length;
   
   const filteredSales = sales.filter(sale => {
@@ -63,14 +64,14 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
   }, {} as Record<string, number>);
 
   const chartData = Object.entries(salesByDay).map(([date, revenue]) => ({
-    date: format(new Date(date), 'MMM d'),
+    date: format(new Date(date), 'd MMM', { locale: ptBR }),
     revenue
   })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 
   const chartConfig = {
     revenue: {
-      label: 'Revenue',
+      label: 'Receita',
       color: 'hsl(var(--accent))',
     },
   };
@@ -80,35 +81,35 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Available Dogs</CardTitle>
+            <CardTitle className="text-sm font-medium">Cães Disponíveis</CardTitle>
             <Dog className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{availableDogs}</div>
-            <p className="text-xs text-muted-foreground">Ready for a new home</p>
+            <p className="text-xs text-muted-foreground">Prontos para um novo lar</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tutors</CardTitle>
+            <CardTitle className="text-sm font-medium">Total de Tutores</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalTutors}</div>
-            <p className="text-xs text-muted-foreground">Registered in the system</p>
+            <p className="text-xs text-muted-foreground">Registrados no sistema</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${totalRevenue.toLocaleString()}
+              {totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Based on selected date range
+              Com base no intervalo de datas selecionado
             </p>
           </CardContent>
         </Card>
@@ -118,8 +119,8 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <CardTitle className="font-headline">Financial Summary</CardTitle>
-                <p className="text-sm text-muted-foreground">A summary of sales over time.</p>
+                <CardTitle className="font-headline">Resumo Financeiro</CardTitle>
+                <p className="text-sm text-muted-foreground">Um resumo das vendas ao longo do tempo.</p>
               </div>
               <Popover>
                 <PopoverTrigger asChild>
@@ -135,14 +136,14 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
                     {date?.from ? (
                       date.to ? (
                         <>
-                          {format(date.from, "LLL dd, y")} -{" "}
-                          {format(date.to, "LLL dd, y")}
+                          {format(date.from, "LLL dd, y", { locale: ptBR })} -{" "}
+                          {format(date.to, "LLL dd, y", { locale: ptBR })}
                         </>
                       ) : (
-                        format(date.from, "LLL dd, y")
+                        format(date.from, "LLL dd, y", { locale: ptBR })
                       )
                     ) : (
-                      <span>Pick a date</span>
+                      <span>Escolha uma data</span>
                     )}
                   </Button>
                 </PopoverTrigger>
@@ -154,6 +155,7 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
                     selected={date}
                     onSelect={setDate}
                     numberOfMonths={2}
+                    locale={ptBR}
                   />
                 </PopoverContent>
               </Popover>
@@ -164,7 +166,7 @@ export default function DashboardClient({ dogs, tutors, sales }: DashboardClient
             <BarChart accessibilityLayer data={chartData}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-              <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `$${value}`} />
+              <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `R$${value}`} />
               <ChartTooltip
                 cursor={false}
                 content={<ChartTooltipContent indicator="dot" />}

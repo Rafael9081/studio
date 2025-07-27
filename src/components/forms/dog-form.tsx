@@ -30,12 +30,12 @@ import { addDog, updateDog } from "@/lib/data"
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: "O nome deve ter pelo menos 2 caracteres.",
   }),
   breed: z.string().min(2, {
-    message: "Breed must be at least 2 characters.",
+    message: "A raça deve ter pelo menos 2 caracteres.",
   }),
-  sex: z.enum(["Male", "Female"]),
+  sex: z.enum(["Macho", "Fêmea"]),
 })
 
 interface DogFormProps {
@@ -52,7 +52,7 @@ export default function DogForm({ dog }: DogFormProps) {
     defaultValues: {
       name: dog?.name || "",
       breed: dog?.breed || "",
-      sex: dog?.sex || "Male",
+      sex: dog?.sex || "Macho",
     },
   })
  
@@ -61,22 +61,22 @@ export default function DogForm({ dog }: DogFormProps) {
         if (isEditing) {
             updateDog({ ...dog, ...values });
             toast({
-                title: "Success!",
-                description: "Dog details have been updated.",
+                title: "Sucesso!",
+                description: "Os detalhes do cão foram atualizados.",
             })
         } else {
             addDog(values);
             toast({
-                title: "Success!",
-                description: "New dog has been registered.",
+                title: "Sucesso!",
+                description: "Novo cão foi registrado.",
             })
         }
         router.push('/dogs');
         router.refresh();
     } catch (error) {
         toast({
-            title: "Error",
-            description: "Something went wrong. Please try again.",
+            title: "Erro",
+            description: "Algo deu errado. Por favor, tente novamente.",
             variant: "destructive"
         })
     }
@@ -93,7 +93,7 @@ export default function DogForm({ dog }: DogFormProps) {
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel>Nome</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Buddy" {...field} />
                                 </FormControl>
@@ -106,7 +106,7 @@ export default function DogForm({ dog }: DogFormProps) {
                             name="breed"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Breed</FormLabel>
+                                <FormLabel>Raça</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Golden Retriever" {...field} />
                                 </FormControl>
@@ -119,16 +119,16 @@ export default function DogForm({ dog }: DogFormProps) {
                             name="sex"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Sex</FormLabel>
+                                <FormLabel>Sexo</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Select sex" />
+                                        <SelectValue placeholder="Selecione o sexo" />
                                     </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                    <SelectItem value="Male">Male</SelectItem>
-                                    <SelectItem value="Female">Female</SelectItem>
+                                    <SelectItem value="Macho">Macho</SelectItem>
+                                    <SelectItem value="Fêmea">Fêmea</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -137,8 +137,8 @@ export default function DogForm({ dog }: DogFormProps) {
                         />
                     </div>
                     <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-                        <Button type="submit">{isEditing ? "Save Changes" : "Register Dog"}</Button>
+                        <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+                        <Button type="submit">{isEditing ? "Salvar Alterações" : "Registrar Cão"}</Button>
                     </div>
                 </form>
             </Form>

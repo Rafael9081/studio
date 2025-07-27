@@ -9,9 +9,9 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Dashboard</h1>
+        <h1 className="text-3xl font-bold font-headline">Painel</h1>
         <p className="text-muted-foreground">
-          Welcome to your kennel manager. Here's a summary of your operations.
+          Bem-vindo ao seu gerenciador de canil. Aqui está um resumo de suas operações.
         </p>
       </div>
       <DashboardClient dogs={dogs} tutors={tutors} sales={sales} />

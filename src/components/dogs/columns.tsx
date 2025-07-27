@@ -22,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 export const columns: ColumnDef<Dog>[] = [
   {
     accessorKey: 'name',
-    header: 'Name',
+    header: 'Nome',
     cell: ({ row }) => {
         const dog = row.original;
         return (
@@ -38,19 +38,20 @@ export const columns: ColumnDef<Dog>[] = [
   },
   {
     accessorKey: 'breed',
-    header: 'Breed',
+    header: 'Raça',
   },
   {
     accessorKey: 'sex',
-    header: 'Sex',
+    header: 'Sexo',
   },
   {
     accessorKey: 'status',
     header: 'Status',
     cell: ({ row }) => {
       const status = row.getValue('status') as string;
+      const variant = status === 'Disponível' ? 'secondary' : 'default';
       return (
-        <Badge variant={status === 'Available' ? 'secondary' : 'default'}>
+        <Badge variant={variant}>
           {status}
         </Badge>
       );
@@ -66,8 +67,8 @@ export const columns: ColumnDef<Dog>[] = [
         // In a real app, you'd show a confirmation dialog first
         deleteDog(dog.id);
         toast({
-            title: "Dog Deleted",
-            description: `${dog.name} has been removed from the system.`,
+            title: "Cão Deletado",
+            description: `${dog.name} foi removido do sistema.`,
         });
       };
 
@@ -75,17 +76,17 @@ export const columns: ColumnDef<Dog>[] = [
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">Abrir menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>Ações</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/dogs/${dog.id}/edit`}>Edit Details</Link>
+              <Link href={`/dogs/${dog.id}/edit`}>Editar Detalhes</Link>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-                Delete Record
+                Excluir Registro
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

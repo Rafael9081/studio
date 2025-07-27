@@ -20,7 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 export const columns: ColumnDef<Tutor>[] = [
   {
     accessorKey: 'name',
-    header: 'Name',
+    header: 'Nome',
     cell: ({ row }) => {
         const tutor = row.original;
         return (
@@ -36,7 +36,7 @@ export const columns: ColumnDef<Tutor>[] = [
   },
   {
     accessorKey: 'phone',
-    header: 'Phone Number',
+    header: 'Número de Telefone',
   },
   {
     id: 'actions',
@@ -47,8 +47,8 @@ export const columns: ColumnDef<Tutor>[] = [
       const handleDelete = () => {
         deleteTutor(tutor.id);
         toast({
-            title: "Tutor Deleted",
-            description: `${tutor.name} has been removed from the system.`,
+            title: "Tutor Deletado",
+            description: `${tutor.name} foi removido do sistema.`,
         });
       };
 
@@ -56,17 +56,17 @@ export const columns: ColumnDef<Tutor>[] = [
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">Abrir menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>Ações</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/tutors/${tutor.id}/edit`}>Edit Details</Link>
+              <Link href={`/tutors/${tutor.id}/edit`}>Editar Detalhes</Link>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-                Delete Record
+                Excluir Registro
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

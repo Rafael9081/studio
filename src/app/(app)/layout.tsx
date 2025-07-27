@@ -34,10 +34,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Settings">
+              <SidebarMenuButton asChild tooltip="Configurações">
                 <Link href="#">
                   <Settings />
-                  <span>Settings</span>
+                  <span>Configurações</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -48,7 +48,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <header className="flex h-14 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-6">
             <SidebarTrigger className="md:hidden" />
             <div className="flex-1">
-                {/* Can add breadcrumbs or page title here */}
+                {/* Pode adicionar breadcrumbs ou título da página aqui */}
             </div>
             <Avatar>
                 <AvatarFallback>U</AvatarFallback>

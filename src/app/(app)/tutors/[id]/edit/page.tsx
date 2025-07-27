@@ -12,9 +12,9 @@ export default function EditTutorPage({ params }: { params: { id: string } }) {
   return (
     <div className="flex flex-col gap-8">
        <div>
-          <h1 className="text-3xl font-bold font-headline">Edit Tutor Details</h1>
+          <h1 className="text-3xl font-bold font-headline">Editar Detalhes do Tutor</h1>
           <p className="text-muted-foreground">
-            Update the information for {tutor.name}.
+            Atualize as informações para {tutor.name}.
           </p>
         </div>
         <TutorForm tutor={tutor} />

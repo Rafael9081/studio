@@ -4,9 +4,9 @@ export default function NewDogPage() {
   return (
     <div className="flex flex-col gap-8">
        <div>
-          <h1 className="text-3xl font-bold font-headline">Register a New Dog</h1>
+          <h1 className="text-3xl font-bold font-headline">Registrar um Novo Cão</h1>
           <p className="text-muted-foreground">
-            Fill out the form below to add a new dog to your kennel.
+            Preencha o formulário abaixo para adicionar um novo cão ao seu canil.
           </p>
         </div>
         <DogForm />

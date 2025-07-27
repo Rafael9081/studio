@@ -23,10 +23,10 @@ import { addTutor, updateTutor } from "@/lib/data"
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+    message: "O nome deve ter pelo menos 2 caracteres.",
   }),
   phone: z.string().min(10, {
-    message: "Phone number must be at least 10 characters.",
+    message: "O número de telefone deve ter pelo menos 10 caracteres.",
   }),
 })
 
@@ -52,22 +52,22 @@ export default function TutorForm({ tutor }: TutorFormProps) {
         if (isEditing) {
             updateTutor({ ...tutor, ...values });
             toast({
-                title: "Success!",
-                description: "Tutor details have been updated.",
+                title: "Sucesso!",
+                description: "Os detalhes do tutor foram atualizados.",
             })
         } else {
             addTutor(values);
             toast({
-                title: "Success!",
-                description: "New tutor has been registered.",
+                title: "Sucesso!",
+                description: "Novo tutor foi registrado.",
             })
         }
         router.push('/tutors');
         router.refresh();
     } catch (error) {
         toast({
-            title: "Error",
-            description: "Something went wrong. Please try again.",
+            title: "Erro",
+            description: "Algo deu errado. Por favor, tente novamente.",
             variant: "destructive"
         })
     }
@@ -84,7 +84,7 @@ export default function TutorForm({ tutor }: TutorFormProps) {
                             name="name"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Name</FormLabel>
+                                <FormLabel>Nome</FormLabel>
                                 <FormControl>
                                     <Input placeholder="John Doe" {...field} />
                                 </FormControl>
@@ -97,7 +97,7 @@ export default function TutorForm({ tutor }: TutorFormProps) {
                             name="phone"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Phone Number</FormLabel>
+                                <FormLabel>Número de Telefone</FormLabel>
                                 <FormControl>
                                     <Input placeholder="123-456-7890" {...field} />
                                 </FormControl>
@@ -107,8 +107,8 @@ export default function TutorForm({ tutor }: TutorFormProps) {
                         />
                     </div>
                     <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
-                        <Button type="submit">{isEditing ? "Save Changes" : "Register Tutor"}</Button>
+                        <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+                        <Button type="submit">{isEditing ? "Salvar Alterações" : "Registrar Tutor"}</Button>
                     </div>
                 </form>
             </Form>

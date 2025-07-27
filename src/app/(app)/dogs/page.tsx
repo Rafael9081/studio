@@ -13,15 +13,15 @@ export default function DogsPage() {
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-headline">Manage Dogs</h1>
+          <h1 className="text-3xl font-bold font-headline">Gerenciar Cães</h1>
           <p className="text-muted-foreground">
-            Add, edit, or delete dog records.
+            Adicione, edite ou exclua registros de cães.
           </p>
         </div>
         <Button asChild>
           <Link href="/dogs/new">
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Dog
+            Adicionar Cão
           </Link>
         </Button>
       </div>

@@ -2,8 +2,8 @@ export type Dog = {
   id: string;
   name: string;
   breed: string;
-  sex: 'Male' | 'Female';
-  status: 'Available' | 'Sold';
+  sex: 'Macho' | 'Fêmea';
+  status: 'Disponível' | 'Vendido';
   tutorId?: string;
   salePrice?: number;
   dateOfSale?: Date;
@@ -20,7 +20,7 @@ export type Tutor = {
 export type Expense = {
   id: string;
   dogId: string;
-  type: 'Food' | 'Vaccines' | 'Medical' | 'General';
+  type: 'Alimentação' | 'Vacinas' | 'Veterinário' | 'Geral';
   amount: number;
   date: Date;
   description: string;

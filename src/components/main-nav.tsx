@@ -11,9 +11,9 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/dogs', icon: Dog, label: 'Dogs' },
-  { href: '/tutors', icon: Users, label: 'Tutors' },
+  { href: '/dashboard', icon: LayoutDashboard, label: 'Painel' },
+  { href: '/dogs', icon: Dog, label: 'Cães' },
+  { href: '/tutors', icon: Users, label: 'Tutores' },
 ];
 
 export default function MainNav() {
