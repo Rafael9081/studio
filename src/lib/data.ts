@@ -1,3 +1,5 @@
+'use server';
+
 // This is a mock database. In a real application, you would use a real database.
 import { type Dog, type Tutor, type Expense, type Sale } from './types';
 import { revalidatePath } from 'next/cache';
@@ -29,70 +31,70 @@ let sales: Sale[] = [
 ];
 
 // Dogs
-export const getDogs = () => dogs;
-export const getDogById = (id: string) => dogs.find(dog => dog.id === id);
-export const addDog = (dog: Omit<Dog, 'id' | 'status'>) => {
+export const getDogs = async () => dogs;
+export const getDogById = async (id: string) => dogs.find(dog => dog.id === id);
+export const addDog = async (dog: Omit<Dog, 'id' | 'status'>) => {
   const newDog: Dog = { ...dog, id: String(Date.now()), status: 'Disponível', avatar: 'https://placehold.co/40x40.png' };
   dogs.push(newDog);
   revalidatePath('/dogs');
   revalidatePath('/dashboard');
   return newDog;
 };
-export const updateDog = (updatedDog: Dog) => {
+export const updateDog = async (updatedDog: Dog) => {
     const index = dogs.findIndex(dog => dog.id === updatedDog.id);
     if(index !== -1) {
         dogs[index] = updatedDog;
         revalidatePath('/dogs');
-        revalidatePath(`/dogs/${updatedDog.id}`);
+        revalidatePath(`/dogs/${updatedDog.id}/edit`);
         revalidatePath('/dashboard');
         return dogs[index];
     }
     return null;
 }
-export const deleteDog = (id: string) => {
+export const deleteDog = async (id: string) => {
     dogs = dogs.filter(dog => dog.id !== id);
     expenses = expenses.filter(expense => expense.dogId !== id);
     sales = sales.filter(sale => sale.dogId !== id);
     revalidatePath('/dogs');
     revalidatePath('/dashboard');
 };
-export const recordSale = (sale: Sale) => {
-    const dog = getDogById(sale.dogId);
+export const recordSale = async (sale: Sale) => {
+    const dog = await getDogById(sale.dogId);
     if (dog) {
         dog.status = 'Vendido';
         dog.tutorId = sale.tutorId;
         dog.salePrice = sale.price;
         dog.dateOfSale = sale.date;
-        updateDog(dog);
+        await updateDog(dog);
         sales.push(sale);
         revalidatePath('/dashboard');
         revalidatePath('/dogs');
-        revalidatePath(`/dogs/${sale.dogId}`);
+        revalidatePath(`/dogs/${sale.dogId}/edit`);
     }
 };
 
 
 // Tutors
-export const getTutors = () => tutors;
-export const getTutorById = (id: string) => tutors.find(tutor => tutor.id === id);
-export const addTutor = (tutor: Omit<Tutor, 'id'>) => {
+export const getTutors = async () => tutors;
+export const getTutorById = async (id: string) => tutors.find(tutor => tutor.id === id);
+export const addTutor = async (tutor: Omit<Tutor, 'id'>) => {
     const newTutor: Tutor = { ...tutor, id: String(Date.now()), avatar: 'https://placehold.co/40x40.png' };
     tutors.push(newTutor);
     revalidatePath('/tutors');
     revalidatePath('/dashboard');
     return newTutor;
 };
-export const updateTutor = (updatedTutor: Tutor) => {
+export const updateTutor = async (updatedTutor: Tutor) => {
     const index = tutors.findIndex(tutor => tutor.id === updatedTutor.id);
     if(index !== -1) {
         tutors[index] = updatedTutor;
         revalidatePath('/tutors');
-        revalidatePath(`/tutors/${updatedTutor.id}`);
+        revalidatePath(`/tutors/${updatedTutor.id}/edit`);
         return tutors[index];
     }
     return null;
 };
-export const deleteTutor = (id: string) => {
+export const deleteTutor = async (id: string) => {
     tutors = tutors.filter(tutor => tutor.id !== id);
     // Optional: handle what happens to dogs associated with a deleted tutor
     dogs.forEach(dog => {
@@ -106,13 +108,13 @@ export const deleteTutor = (id: string) => {
 };
 
 // Expenses
-export const getExpensesByDogId = (dogId: string) => expenses.filter(e => e.dogId === dogId);
-export const addExpense = (expense: Omit<Expense, 'id'>) => {
+export const getExpensesByDogId = async (dogId: string) => expenses.filter(e => e.dogId === dogId);
+export const addExpense = async (expense: Omit<Expense, 'id'>) => {
     const newExpense = { ...expense, id: String(Date.now()) };
     expenses.push(newExpense);
-    revalidatePath(`/dogs/${expense.dogId}`);
+    revalidatePath(`/dogs/${expense.dogId}/edit`);
     return newExpense;
 }
 
 // Sales
-export const getSales = () => sales;
+export const getSales = async () => sales;

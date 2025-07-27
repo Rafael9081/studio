@@ -3,6 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -43,13 +44,15 @@ export const columns: ColumnDef<Tutor>[] = [
     cell: ({ row }) => {
       const tutor = row.original;
       const { toast } = useToast();
+      const router = useRouter();
 
-      const handleDelete = () => {
-        deleteTutor(tutor.id);
+      const handleDelete = async () => {
+        await deleteTutor(tutor.id);
         toast({
             title: "Tutor Deletado",
             description: `${tutor.name} foi removido do sistema.`,
         });
+        router.refresh();
       };
 
       return (

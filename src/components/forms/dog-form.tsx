@@ -56,16 +56,16 @@ export default function DogForm({ dog }: DogFormProps) {
     },
   })
  
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
         if (isEditing) {
-            updateDog({ ...dog, ...values });
+            await updateDog({ ...dog, ...values });
             toast({
                 title: "Sucesso!",
                 description: "Os detalhes do cão foram atualizados.",
             })
         } else {
-            addDog(values);
+            await addDog(values);
             toast({
                 title: "Sucesso!",
                 description: "Novo cão foi registrado.",

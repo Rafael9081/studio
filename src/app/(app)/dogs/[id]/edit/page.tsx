@@ -2,8 +2,8 @@ import DogForm from "@/components/forms/dog-form";
 import { getDogById } from "@/lib/data";
 import { notFound } from "next/navigation";
 
-export default function EditDogPage({ params }: { params: { id: string } }) {
-  const dog = getDogById(params.id);
+export default async function EditDogPage({ params }: { params: { id: string } }) {
+  const dog = await getDogById(params.id);
 
   if (!dog) {
     notFound();

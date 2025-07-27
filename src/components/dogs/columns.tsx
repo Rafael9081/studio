@@ -3,6 +3,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { MoreHorizontal, ArrowUpRight } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -62,14 +63,16 @@ export const columns: ColumnDef<Dog>[] = [
     cell: ({ row }) => {
       const dog = row.original;
       const { toast } = useToast();
+      const router = useRouter();
 
-      const handleDelete = () => {
+      const handleDelete = async () => {
         // In a real app, you'd show a confirmation dialog first
-        deleteDog(dog.id);
+        await deleteDog(dog.id);
         toast({
             title: "Cão Deletado",
             description: `${dog.name} foi removido do sistema.`,
         });
+        router.refresh();
       };
 
       return (

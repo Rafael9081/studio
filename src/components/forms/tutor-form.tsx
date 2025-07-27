@@ -47,16 +47,16 @@ export default function TutorForm({ tutor }: TutorFormProps) {
     },
   })
  
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
         if (isEditing) {
-            updateTutor({ ...tutor, ...values });
+            await updateTutor({ ...tutor, ...values });
             toast({
                 title: "Sucesso!",
                 description: "Os detalhes do tutor foram atualizados.",
             })
         } else {
-            addTutor(values);
+            await addTutor(values);
             toast({
                 title: "Sucesso!",
                 description: "Novo tutor foi registrado.",
