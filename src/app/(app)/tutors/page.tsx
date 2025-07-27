@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { TutorsDataTable } from "@/components/tutors/data-table";
 import { columns } from "@/components/tutors/columns";
 
-export default function TutorsPage() {
-  const tutors = getTutors();
+export default async function TutorsPage() {
+  const tutors = await getTutors();
 
   return (
     <div className="flex flex-col gap-8">
