@@ -1,16 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { Dog, Users, DollarSign, Calendar as CalendarIcon, Wallet } from 'lucide-react';
+import { Dog, Users, DollarSign, Calendar as CalendarIcon, Wallet, TrendingUp } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Line, LineChart, Legend } from 'recharts';
+import { Line, LineChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Legend } from 'recharts';
 import type { Dog as DogType, Tutor, Sale, Expense, GeneralExpense } from '@/lib/types';
-import { addDays, format } from "date-fns"
+import { addDays, format, sub } from "date-fns"
 import { ptBR } from 'date-fns/locale';
 import { DateRange } from "react-day-picker"
 
@@ -32,7 +32,7 @@ interface DashboardClientProps {
 
 export default function DashboardClient({ dogs, tutors, sales, expenses }: DashboardClientProps) {
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: addDays(new Date(), -29),
+    from: sub(new Date(), { days: 29 }),
     to: new Date(),
   })
 
@@ -69,6 +69,7 @@ export default function DashboardClient({ dogs, tutors, sales, expenses }: Dashb
 
   const totalRevenue = filteredSales.reduce((acc, sale) => acc + sale.price, 0);
   const totalExpenses = filteredExpenses.reduce((acc, expense) => acc + expense.amount, 0);
+  const netProfit = totalRevenue - totalExpenses;
 
   const dailyData = [...filteredSales, ...filteredExpenses].reduce((acc, item) => {
     const day = format(new Date(item.date), 'yyyy-MM-dd');
@@ -106,26 +107,6 @@ export default function DashboardClient({ dogs, tutors, sales, expenses }: Dashb
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cães Disponíveis</CardTitle>
-            <Dog className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{availableDogs}</div>
-            <p className="text-xs text-muted-foreground">Prontos para um novo lar</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Tutores</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalTutors}</div>
-            <p className="text-xs text-muted-foreground">Registrados no sistema</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -134,7 +115,7 @@ export default function DashboardClient({ dogs, tutors, sales, expenses }: Dashb
               {totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Com base no período
+              Com base no período selecionado
             </p>
           </CardContent>
         </Card>
@@ -148,8 +129,32 @@ export default function DashboardClient({ dogs, tutors, sales, expenses }: Dashb
               {totalExpenses.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </div>
             <p className="text-xs text-muted-foreground">
-              Com base no período
+              Despesas de cães e despesas gerais
             </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Lucro Líquido</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {netProfit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Receitas - Despesas no período
+            </p>
+          </CardContent>
+        </Card>
+         <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Cães Disponíveis</CardTitle>
+            <Dog className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{availableDogs}</div>
+            <p className="text-xs text-muted-foreground">Total de cães à venda</p>
           </CardContent>
         </Card>
       </div>
@@ -158,8 +163,8 @@ export default function DashboardClient({ dogs, tutors, sales, expenses }: Dashb
         <CardHeader>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <CardTitle className="font-headline">Resumo Financeiro</CardTitle>
-                <p className="text-sm text-muted-foreground">Um resumo das vendas e despesas ao longo do tempo.</p>
+                <CardTitle className="font-headline">Visão Geral Financeira</CardTitle>
+                <p className="text-sm text-muted-foreground">Um resumo de receitas e despesas ao longo do tempo.</p>
               </div>
               <Popover>
                 <PopoverTrigger asChild>
