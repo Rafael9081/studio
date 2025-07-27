@@ -12,5 +12,12 @@
     "description": "Salário João",
     "amount": 1500,
     "date": "2024-07-05T00:00:00.000Z"
+  },
+  {
+    "type": "Material",
+    "description": "Compra de papel rolo",
+    "amount": 2000,
+    "date": "2025-07-27T21:20:44.414Z",
+    "id": "1753651244735"
   }
 ]
