@@ -42,8 +42,9 @@ const puppySchema = z.object({
 });
 
 const formSchema = z.object({
-  fatherId: z.string().min(1, "É obrigatório selecionar o pai."),
-  motherId: z.string().min(1, "É obrigatório selecionar a mãe."),
+  fatherId: z.string().optional(),
+  motherId: z.string().optional(),
+  breed: z.string().min(2, { message: "A raça deve ter pelo menos 2 caracteres."}),
   birthDate: z.date({ required_error: "É obrigatório inserir a data de nascimento."}),
   puppies: z.array(puppySchema).min(1, "Você deve adicionar pelo menos um filhote."),
 })
@@ -66,6 +67,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       puppies: [],
+      breed: ""
     },
   })
 
@@ -73,6 +75,17 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
     control: form.control,
     name: "puppies"
   });
+
+  const selectedMotherId = form.watch("motherId");
+
+  React.useEffect(() => {
+    if (selectedMotherId) {
+        const mother = femaleDogs.find(d => d.id === selectedMotherId);
+        if (mother) {
+            form.setValue("breed", mother.breed);
+        }
+    }
+  }, [selectedMotherId, femaleDogs, form]);
  
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
     const file = event.target.files?.[0];
@@ -97,18 +110,9 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    const mother = femaleDogs.find(d => d.id === values.motherId);
-    if (!mother) {
-        toast({ title: "Erro", description: "Mãe não encontrada.", variant: "destructive" });
-        setIsSubmitting(false);
-        return;
-    }
-
+    
     try {
-        await addLitter({
-            ...values,
-            breed: mother.breed
-        });
+        await addLitter(values);
 
         toast({
             title: "Sucesso!",
@@ -138,7 +142,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                             name="fatherId"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Pai</FormLabel>
+                                <FormLabel>Pai (Opcional)</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                                     <FormControl>
                                     <SelectTrigger>
@@ -158,7 +162,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                             name="motherId"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Mãe</FormLabel>
+                                <FormLabel>Mãe (Opcional)</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                                     <FormControl>
                                     <SelectTrigger>
@@ -173,20 +177,36 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                                 </FormItem>
                             )}
                         />
-                    </div>
-                     <FormField
-                        control={form.control}
-                        name="birthDate"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Data de Nascimento da Ninhada</FormLabel>
+                         <FormField
+                            control={form.control}
+                            name="breed"
+                            render={({ field }) => (
+                                <FormItem>
+                                <FormLabel>Raça</FormLabel>
                                 <FormControl>
-                                    <Input type="date" {...field} value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => field.onChange(e.target.valueAsDate)} disabled={isSubmitting} />
+                                    <Input placeholder="Golden Retriever" {...field} disabled={isSubmitting}/>
                                 </FormControl>
+                                <FormDescription>
+                                    Será preenchido automaticamente se a mãe for selecionada.
+                                </FormDescription>
                                 <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                                </FormItem>
+                            )}
+                        />
+                         <FormField
+                            control={form.control}
+                            name="birthDate"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Data de Nascimento da Ninhada</FormLabel>
+                                    <FormControl>
+                                        <Input type="date" {...field} value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => field.onChange(e.target.valueAsDate)} disabled={isSubmitting} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
                     <Separator />
 

@@ -264,7 +264,7 @@ export const getSales = async (): Promise<Sale[]> => {
 };
 
 // Litters
-export const addLitter = async (litter: Omit<LitterData, 'puppies'> & { breed: string, puppies: PuppyData[] }) => {
+export const addLitter = async (litter: Omit<LitterData, 'puppies'> & { puppies: PuppyData[] }) => {
     const batch = writeBatch(db);
     const dogsCol = collection(db, 'dogs');
 
@@ -273,32 +273,18 @@ export const addLitter = async (litter: Omit<LitterData, 'puppies'> & { breed: s
 
         const { avatar, ...puppyData } = puppy;
 
-        const newDogPayload = {
+        const newDogPayload: Omit<Dog, 'id'> = {
             ...puppyData,
             breed: litter.breed,
             birthDate: litter.birthDate,
             fatherId: litter.fatherId,
             motherId: litter.motherId,
-            status: 'Disponível' as const,
+            status: 'Disponível',
             avatar: '', // Placeholder, will be updated
         };
 
         // Set the document data first (without avatar)
         batch.set(newDogRef, newDogPayload);
-
-        // Upload image and schedule an update for the avatar URL
-        const uploadAndUpdateAvatar = async () => {
-            let avatarUrl = `https://placehold.co/40x40.png?text=${puppy.name.charAt(0)}`;
-            if (avatar) {
-                avatarUrl = await uploadImage(avatar, newDogRef.id);
-            }
-            // Use a new batch or update directly, as batch has been committed.
-            await updateDoc(newDogRef, { avatar: avatarUrl });
-        };
-        
-        // We can't await inside the loop, so we'll handle image uploads after the batch commit.
-        // For simplicity here, we'll do them sequentially after. A more robust solution might
-        // use Promise.all() after the loop.
     }
 
     await batch.commit();
@@ -307,11 +293,11 @@ export const addLitter = async (litter: Omit<LitterData, 'puppies'> & { breed: s
     // A better approach for production would be to trigger a cloud function
     // on document creation to handle image processing and updating.
     // For now, we'll re-fetch the newly created dogs to get their IDs.
-    const newDogsQuery = query(
+     const newDogsQuery = query(
         dogsCol,
-        where('fatherId', '==', litter.fatherId),
         where('motherId', '==', litter.motherId),
         where('birthDate', '==', litter.birthDate),
+        litter.fatherId ? where('fatherId', '==', litter.fatherId) : where('fatherId', 'in', [null, undefined, ""])
     );
 
     const newDogsSnapshot = await getDocs(newDogsQuery);
