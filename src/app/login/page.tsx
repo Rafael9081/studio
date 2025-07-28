@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,7 +9,7 @@ import { PawPrint, Mail, KeyRound, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { createTestUser, signInUser } from '@/lib/firebase/auth';
+import { signInUser } from '@/lib/firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import Loading from '../(app)/loading';
@@ -26,11 +26,6 @@ export default function LoginPage() {
   const router = useRouter();
   const { user, loading } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    // Ensure the test user is created when the app loads
-    createTestUser();
-  }, []);
 
   const {
     register,
