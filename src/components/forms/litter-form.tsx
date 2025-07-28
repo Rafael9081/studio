@@ -137,188 +137,186 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
   }
 
   return (
-    <Card>
-        <CardContent className="p-6">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField
-                            control={form.control}
-                            name="fatherId"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Pai (Opcional)</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione o pai" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    {maleDogs.map(dog => <SelectItem key={dog.id} value={dog.id}>{dog.name}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="motherId"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Mãe (Opcional)</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione a mãe" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    {femaleDogs.map(dog => <SelectItem key={dog.id} value={dog.id}>{dog.name}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="breed"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Raça</FormLabel>
+    <CardContent className="p-6">
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                        control={form.control}
+                        name="fatherId"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Pai (Opcional)</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                                 <FormControl>
-                                    <Input placeholder="Golden Retriever" {...field} disabled={isSubmitting}/>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o pai" />
+                                </SelectTrigger>
                                 </FormControl>
-                                <FormDescription>
-                                    Será preenchido automaticamente se a mãe for selecionada.
-                                </FormDescription>
+                                <SelectContent>
+                                {maleDogs.map(dog => <SelectItem key={dog.id} value={dog.id}>{dog.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="motherId"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Mãe (Opcional)</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecione a mãe" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                {femaleDogs.map(dog => <SelectItem key={dog.id} value={dog.id}>{dog.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="breed"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Raça</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Golden Retriever" {...field} disabled={isSubmitting}/>
+                            </FormControl>
+                            <FormDescription>
+                                Será preenchido automaticamente se a mãe for selecionada.
+                            </FormDescription>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="birthDate"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Data de Nascimento da Ninhada</FormLabel>
+                                <FormControl>
+                                    <Input type="date" {...field} disabled={isSubmitting} />
+                                </FormControl>
                                 <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="birthDate"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Data de Nascimento da Ninhada</FormLabel>
-                                    <FormControl>
-                                        <Input type="date" {...field} disabled={isSubmitting} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+
+                <Separator />
+
+                <div>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium">Filhotes</h3>
+                        <Button type="button" variant="outline" size="sm" onClick={() => append({ name: '', sex: 'Macho' })}>
+                            <PlusCircle className="mr-2" />
+                            Adicionar Filhote
+                        </Button>
                     </div>
-
-                    <Separator />
-
-                    <div>
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-medium">Filhotes</h3>
-                            <Button type="button" variant="outline" size="sm" onClick={() => append({ name: '', sex: 'Macho' })}>
-                                <PlusCircle className="mr-2" />
-                                Adicionar Filhote
-                            </Button>
-                        </div>
-                        
-                        <div className="space-y-6">
-                            {fields.map((field, index) => {
-                                const imagePreview = form.watch(`puppies.${index}.avatar`);
-                                return (
-                                <Card key={field.id} className="p-4 bg-muted/50">
-                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+                    
+                    <div className="space-y-6">
+                        {fields.map((field, index) => {
+                            const imagePreview = form.watch(`puppies.${index}.avatar`);
+                            return (
+                            <Card key={field.id} className="p-4 bg-muted/50">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+                                    <FormField
+                                        control={form.control}
+                                        name={`puppies.${index}.avatar`}
+                                        render={({ field: imageField }) => (
+                                            <FormItem className="flex flex-col items-center justify-center gap-2">
+                                                <Avatar className="h-24 w-24 border">
+                                                    <AvatarImage src={imagePreview} />
+                                                    <AvatarFallback><Baby /></AvatarFallback>
+                                                </Avatar>
+                                                <Button type="button" size="sm" variant="outline" onClick={() => (document.querySelector(`input[name='puppies.${index}.avatar-input']`) as HTMLInputElement)?.click()}>
+                                                    <Upload className="mr-2" />
+                                                    Foto
+                                                </Button>
+                                                <FormControl>
+                                                    <Input
+                                                        type="file"
+                                                        className="hidden"
+                                                        name={`puppies.${index}.avatar-input`}
+                                                        onChange={(e) => handleImageChange(e, index)}
+                                                        accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <FormField
                                             control={form.control}
-                                            name={`puppies.${index}.avatar`}
-                                            render={({ field: imageField }) => (
-                                                <FormItem className="flex flex-col items-center justify-center gap-2">
-                                                    <Avatar className="h-24 w-24 border">
-                                                        <AvatarImage src={imagePreview} />
-                                                        <AvatarFallback><Baby /></AvatarFallback>
-                                                    </Avatar>
-                                                    <Button type="button" size="sm" variant="outline" onClick={() => (document.querySelector(`input[name='puppies.${index}.avatar-input']`) as HTMLInputElement)?.click()}>
-                                                        <Upload className="mr-2" />
-                                                        Foto
-                                                    </Button>
+                                            name={`puppies.${index}.name`}
+                                            render={({ field: nameField }) => (
+                                                <FormItem>
+                                                    <FormLabel>Nome do Filhote</FormLabel>
                                                     <FormControl>
-                                                        <Input
-                                                            type="file"
-                                                            className="hidden"
-                                                            name={`puppies.${index}.avatar-input`}
-                                                            onChange={(e) => handleImageChange(e, index)}
-                                                            accept={ACCEPTED_IMAGE_TYPES.join(",")}
-                                                        />
+                                                        <Input placeholder="Nome" {...nameField} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
-                                        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <FormField
-                                                control={form.control}
-                                                name={`puppies.${index}.name`}
-                                                render={({ field: nameField }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Nome do Filhote</FormLabel>
+                                        <FormField
+                                            control={form.control}
+                                            name={`puppies.${index}.sex`}
+                                            render={({ field: sexField }) => (
+                                                <FormItem>
+                                                    <FormLabel>Sexo</FormLabel>
+                                                    <Select onValueChange={sexField.onChange} defaultValue={sexField.value}>
                                                         <FormControl>
-                                                            <Input placeholder="Nome" {...nameField} />
+                                                            <SelectTrigger>
+                                                                <SelectValue />
+                                                            </SelectTrigger>
                                                         </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={form.control}
-                                                name={`puppies.${index}.sex`}
-                                                render={({ field: sexField }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Sexo</FormLabel>
-                                                        <Select onValueChange={sexField.onChange} defaultValue={sexField.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="Macho">Macho</SelectItem>
-                                                                <SelectItem value="Fêmea">Fêmea</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <div className="sm:col-span-2 flex justify-end">
-                                                <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
-                                                    <Trash />
-                                                    <span className="sr-only">Remover Filhote</span>
-                                                </Button>
-                                            </div>
+                                                        <SelectContent>
+                                                            <SelectItem value="Macho">Macho</SelectItem>
+                                                            <SelectItem value="Fêmea">Fêmea</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <div className="sm:col-span-2 flex justify-end">
+                                            <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                                                <Trash />
+                                                <span className="sr-only">Remover Filhote</span>
+                                            </Button>
                                         </div>
                                     </div>
-                                </Card>
-                            )})}
-                            {form.formState.errors.puppies && fields.length === 0 && (
-                            <p className="text-sm font-medium text-destructive">
-                                {form.formState.errors.puppies.message}
-                            </p>
-                            )}
-                        </div>
+                                </div>
+                            </Card>
+                        )})}
+                        {form.formState.errors.puppies && fields.length === 0 && (
+                        <p className="text-sm font-medium text-destructive">
+                            {form.formState.errors.puppies.message}
+                        </p>
+                        )}
                     </div>
+                </div>
 
 
-                    <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>Cancelar</Button>
-                        <Button type="submit" disabled={isSubmitting || fields.length === 0}>
-                            {isSubmitting ? 'Registrando...' : 'Registrar Ninhada'}
-                        </Button>
-                    </div>
-                </form>
-            </Form>
-        </CardContent>
-    </Card>
+                <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>Cancelar</Button>
+                    <Button type="submit" disabled={isSubmitting || fields.length === 0}>
+                        {isSubmitting ? 'Registrando...' : 'Registrar Ninhada'}
+                    </Button>
+                </div>
+            </form>
+        </Form>
+    </CardContent>
   )
 }

@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import type { Dog } from "@/lib/types"
 import { addExpense } from "@/lib/data"
@@ -74,90 +74,88 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
   }
 
   return (
-    <Card>
-        <CardContent className="p-6">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <CardContent className="p-6">
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                        control={form.control}
+                        name="dogId"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Cão</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecione um cão" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                {dogs.map(dog => (
+                                    <SelectItem key={dog.id} value={dog.id}>{dog.name}</SelectItem>
+                                ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                         <FormField
-                            control={form.control}
-                            name="dogId"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Cão</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione um cão" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                    {dogs.map(dog => (
-                                        <SelectItem key={dog.id} value={dog.id}>{dog.name}</SelectItem>
-                                    ))}
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                            <FormField
-                            control={form.control}
-                            name="type"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Tipo de Despesa</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione o tipo" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Alimentação">Alimentação</SelectItem>
-                                        <SelectItem value="Vacinas">Vacinas</SelectItem>
-                                        <SelectItem value="Veterinário">Veterinário</SelectItem>
-                                        <SelectItem value="Geral">Geral</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                            <FormField
-                            control={form.control}
-                            name="amount"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Valor (R$)</FormLabel>
+                        control={form.control}
+                        name="type"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Tipo de Despesa</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
-                                    <Input type="number" placeholder="100" {...field} />
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o tipo" />
+                                </SelectTrigger>
                                 </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                            <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Descrição</FormLabel>
-                                <FormControl>
-                                    <Textarea placeholder="Ração premium para filhotes..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-                        <Button type="submit">Registrar Despesa</Button>
-                    </div>
-                </form>
-            </Form>
-        </CardContent>
-    </Card>
+                                <SelectContent>
+                                    <SelectItem value="Alimentação">Alimentação</SelectItem>
+                                    <SelectItem value="Vacinas">Vacinas</SelectItem>
+                                    <SelectItem value="Veterinário">Veterinário</SelectItem>
+                                    <SelectItem value="Geral">Geral</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                        <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Valor (R$)</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="100" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                        <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Descrição</FormLabel>
+                            <FormControl>
+                                <Textarea placeholder="Ração premium para filhotes..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+                    <Button type="submit">Registrar Despesa</Button>
+                </div>
+            </form>
+        </Form>
+    </CardContent>
   )
 }
