@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DogEvent } from '@/lib/types';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar, Heart, Dog, Baby } from 'lucide-react';
 import Link from 'next/link';
@@ -60,7 +60,7 @@ export default function EventsHistory({ events }: EventsHistoryProps) {
             <p className="font-semibold">{event.type}</p>
             <p className="text-sm text-muted-foreground">{getEventDescription(event)}</p>
             <p className="text-xs text-muted-foreground mt-1">
-              {format(new Date(event.date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+              {format(parseISO(event.date as unknown as string), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
             </p>
           </div>
         </div>
