@@ -149,13 +149,9 @@ body {
     margin-bottom: 30px;
 }
 
-.stat-card {
+.stat-item {
     padding: 30px;
     transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
 }
 
 .stat-header {

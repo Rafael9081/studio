@@ -19,7 +19,7 @@ export default async function DashboardPage() {
             </div>
 
             <div className="stats-grid">
-                <div className="stat-card">
+                <div className="stat-item">
                     <div className="stat-header">
                         <div className="stat-title">Cães Disponíveis</div>
                         <div className="stat-icon dogs">
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
                     <div className="stat-subtitle">Total de cães à venda</div>
                 </div>
 
-                <div className="stat-card">
+                <div className="stat-item">
                     <div className="stat-header">
                         <div className="stat-title">Tutores Cadastrados</div>
                         <div className="stat-icon tutors">
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
                     <div className="stat-subtitle">Total de clientes no sistema</div>
                 </div>
 
-                <div className="stat-card">
+                <div className="stat-item">
                     <div className="stat-header">
                         <div className="stat-title">Gestações Pendentes</div>
                         <div className="stat-icon pending">
