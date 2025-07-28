@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
@@ -21,27 +22,36 @@ import { deleteDog } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '../ui/checkbox';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/auth.tsx';
 
 export const columns: ColumnDef<Dog>[] = [
    {
     id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Selecionar tudo"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Selecionar linha"
-      />
-    ),
+    header: ({ table }) => {
+      const { role } = useAuth();
+      return (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Selecionar tudo"
+          disabled={role !== 'admin'}
+        />
+      );
+    },
+    cell: ({ row }) => {
+       const { role } = useAuth();
+       return (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Selecionar linha"
+            disabled={role !== 'admin'}
+          />
+       )
+    },
     enableSorting: false,
     enableHiding: false,
   },
@@ -108,9 +118,13 @@ export const columns: ColumnDef<Dog>[] = [
       const dog = row.original;
       const { toast } = useToast();
       const router = useRouter();
+      const { role } = useAuth();
 
       const handleDelete = async () => {
-        // In a real app, you'd show a confirmation dialog first
+        if (role !== 'admin') {
+            toast({ title: "Acesso Negado", description: "Você não tem permissão para excluir.", variant: "destructive" });
+            return;
+        }
         await deleteDog(dog.id);
         toast({
             title: "Cão Deletado",
@@ -132,13 +146,17 @@ export const columns: ColumnDef<Dog>[] = [
              <DropdownMenuItem asChild>
               <Link href={`/dogs/${dog.id}`}>Ver Detalhes</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={`/dogs/${dog.id}/edit`}>Editar Detalhes</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-                Excluir Registro
-            </DropdownMenuItem>
+            {role === 'admin' && (
+              <>
+                <DropdownMenuItem asChild>
+                  <Link href={`/dogs/${dog.id}/edit`}>Editar Detalhes</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                    Excluir Registro
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

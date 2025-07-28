@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm } from "react-hook-form"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
-import { Baby, PlusCircle, Trash, Upload, X } from "lucide-react"
+import { Baby, PlusCircle, Trash, Upload } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -32,6 +32,7 @@ import type { Dog } from "@/lib/types"
 import { addLitter } from "@/lib/data"
 import { Separator } from "../ui/separator"
 import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar"
+import { useAuth } from "@/lib/auth.tsx"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -62,6 +63,7 @@ interface LitterFormProps {
 export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { role } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -89,6 +91,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
   }, [selectedMotherId, femaleDogs, form]);
  
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    if (role !== 'admin') return;
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
@@ -110,6 +113,10 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (role !== 'admin') {
+        toast({ title: "Acesso Negado", description: "Você não tem permissão para esta ação.", variant: "destructive" });
+        return;
+    }
     setIsSubmitting(true);
     
     const dataToSubmit = {
@@ -137,6 +144,8 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
     }
   }
 
+  const isReadOnly = role !== 'admin';
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -149,7 +158,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Pai (Opcional)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isReadOnly}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione o pai" />
@@ -169,7 +178,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Mãe (Opcional)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isReadOnly}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a mãe" />
@@ -190,7 +199,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                   <FormItem>
                     <FormLabel>Raça</FormLabel>
                     <FormControl>
-                      <Input placeholder="Golden Retriever" {...field} disabled={isSubmitting} />
+                      <Input placeholder="Golden Retriever" {...field} disabled={isSubmitting || isReadOnly} />
                     </FormControl>
                     <FormDescription>
                       Será preenchido automaticamente se a mãe for selecionada.
@@ -206,7 +215,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                   <FormItem>
                     <FormLabel>Data de Nascimento da Ninhada</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} disabled={isSubmitting} />
+                      <Input type="date" {...field} disabled={isSubmitting || isReadOnly} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -219,10 +228,12 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
             <div>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium">Filhotes</h3>
-                <Button type="button" variant="outline" size="sm" onClick={() => append({ name: '', sex: 'Macho' })}>
-                  <PlusCircle className="mr-2" />
-                  Adicionar Filhote
-                </Button>
+                {!isReadOnly && (
+                    <Button type="button" variant="outline" size="sm" onClick={() => append({ name: '', sex: 'Macho' })}>
+                    <PlusCircle className="mr-2" />
+                    Adicionar Filhote
+                    </Button>
+                )}
               </div>
 
               <div className="space-y-6">
@@ -240,10 +251,12 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                                 <AvatarImage src={imagePreview} />
                                 <AvatarFallback><Baby /></AvatarFallback>
                               </Avatar>
-                              <Button type="button" size="sm" variant="outline" onClick={() => (document.querySelector(`input[name='puppies.${index}.avatar-input']`) as HTMLInputElement)?.click()}>
-                                <Upload className="mr-2" />
-                                Foto
-                              </Button>
+                              {!isReadOnly && (
+                                <Button type="button" size="sm" variant="outline" onClick={() => (document.querySelector(`input[name='puppies.${index}.avatar-input']`) as HTMLInputElement)?.click()}>
+                                    <Upload className="mr-2" />
+                                    Foto
+                                </Button>
+                              )}
                               <FormControl>
                                 <Input
                                   type="file"
@@ -251,6 +264,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                                   name={`puppies.${index}.avatar-input`}
                                   onChange={(e) => handleImageChange(e, index)}
                                   accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                                  disabled={isReadOnly}
                                 />
                               </FormControl>
                               <FormMessage />
@@ -265,7 +279,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                               <FormItem>
                                 <FormLabel>Nome do Filhote</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="Nome" {...nameField} />
+                                  <Input placeholder="Nome" {...nameField} disabled={isReadOnly} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -277,7 +291,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                             render={({ field: sexField }) => (
                               <FormItem>
                                 <FormLabel>Sexo</FormLabel>
-                                <Select onValueChange={sexField.onChange} defaultValue={sexField.value}>
+                                <Select onValueChange={sexField.onChange} defaultValue={sexField.value} disabled={isReadOnly}>
                                   <FormControl>
                                     <SelectTrigger>
                                       <SelectValue />
@@ -293,10 +307,12 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                             )}
                           />
                           <div className="sm:col-span-2 flex justify-end">
-                            <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
-                              <Trash />
-                              <span className="sr-only">Remover Filhote</span>
-                            </Button>
+                            {!isReadOnly && (
+                                <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}>
+                                <Trash />
+                                <span className="sr-only">Remover Filhote</span>
+                                </Button>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -314,9 +330,11 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
 
             <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>Cancelar</Button>
-              <Button type="submit" disabled={isSubmitting || fields.length === 0}>
-                {isSubmitting ? 'Registrando...' : 'Registrar Ninhada'}
-              </Button>
+              {!isReadOnly && (
+                <Button type="submit" disabled={isSubmitting || fields.length === 0}>
+                    {isSubmitting ? 'Registrando...' : 'Registrar Ninhada'}
+                </Button>
+              )}
             </div>
           </form>
         </Form>
@@ -324,5 +342,3 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
     </Card>
   )
 }
-
-    

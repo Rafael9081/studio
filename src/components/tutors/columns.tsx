@@ -1,3 +1,4 @@
+
 'use client';
 
 import { ColumnDef } from '@tanstack/react-table';
@@ -17,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Tutor } from '@/lib/types';
 import { deleteTutor } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/lib/auth.tsx';
 
 export const columns: ColumnDef<Tutor>[] = [
   {
@@ -45,8 +47,13 @@ export const columns: ColumnDef<Tutor>[] = [
       const tutor = row.original;
       const { toast } = useToast();
       const router = useRouter();
+      const { role } = useAuth();
 
       const handleDelete = async () => {
+        if (role !== 'admin') {
+            toast({ title: "Acesso Negado", description: "Você não tem permissão para excluir.", variant: "destructive" });
+            return;
+        }
         await deleteTutor(tutor.id);
         toast({
             title: "Tutor Deletado",
@@ -65,12 +72,19 @@ export const columns: ColumnDef<Tutor>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-              <Link href={`/tutors/${tutor.id}/edit`}>Editar Detalhes</Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-                Excluir Registro
-            </DropdownMenuItem>
+            {role === 'admin' && (
+              <>
+                <DropdownMenuItem asChild>
+                  <Link href={`/tutors/${tutor.id}/edit`}>Editar Detalhes</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                    Excluir Registro
+                </DropdownMenuItem>
+              </>
+            )}
+            {role !== 'admin' && (
+                <DropdownMenuItem disabled>Ver Detalhes (Em breve)</DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );

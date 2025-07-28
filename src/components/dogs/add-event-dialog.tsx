@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -40,6 +41,7 @@ import { useToast } from '@/hooks/use-toast';
 import { addDogEvent } from '@/lib/data';
 import { Dog } from '@/lib/types';
 import { PlusCircle } from 'lucide-react';
+import { useAuth } from '@/lib/auth.tsx';
 
 interface AddEventDialogProps {
   dog: Dog;
@@ -59,6 +61,7 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+  const { role } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -75,6 +78,12 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
   const eventType = form.watch('type');
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (role !== 'admin') {
+      toast({ title: 'Acesso Negado', description: 'Você não tem permissão para esta ação.', variant: 'destructive' });
+      setIsOpen(false);
+      return;
+    }
+
     try {
       const partnerName = values.partnerId ? maleDogs.find(d => d.id === values.partnerId)?.name : undefined;
 
@@ -108,10 +117,14 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
     }
   }
 
+  if (role !== 'admin') {
+    return null;
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="default">
+        <Button variant="default" disabled={role !== 'admin'}>
           <PlusCircle className="mr-2" />
           Registrar Evento
         </Button>

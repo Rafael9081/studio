@@ -27,6 +27,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import type { Dog, Tutor } from "@/lib/types"
 import { recordSale } from "@/lib/data"
+import { useAuth } from "@/lib/auth.tsx"
 
 
 const formSchema = z.object({
@@ -43,6 +44,7 @@ interface SaleFormProps {
 export default function SaleForm({ dogs, tutors }: SaleFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { role } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,6 +54,10 @@ export default function SaleForm({ dogs, tutors }: SaleFormProps) {
   })
  
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (role !== 'admin') {
+        toast({ title: "Acesso Negado", description: "Você não tem permissão para esta ação.", variant: "destructive" });
+        return;
+    }
     try {
         await recordSale({
             ...values,
@@ -72,6 +78,8 @@ export default function SaleForm({ dogs, tutors }: SaleFormProps) {
     }
   }
 
+  const isReadOnly = role !== 'admin';
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -84,7 +92,7 @@ export default function SaleForm({ dogs, tutors }: SaleFormProps) {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Cão</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                                 <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione um cão" />
@@ -106,7 +114,7 @@ export default function SaleForm({ dogs, tutors }: SaleFormProps) {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Tutor</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                                 <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione um tutor" />
@@ -129,7 +137,7 @@ export default function SaleForm({ dogs, tutors }: SaleFormProps) {
                             <FormItem>
                             <FormLabel>Preço (R$)</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="1500" {...field} />
+                                <Input type="number" placeholder="1500" {...field} disabled={isReadOnly} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -138,7 +146,7 @@ export default function SaleForm({ dogs, tutors }: SaleFormProps) {
                 </div>
                 <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-                    <Button type="submit">Registrar Venda</Button>
+                    {!isReadOnly && <Button type="submit">Registrar Venda</Button>}
                 </div>
             </form>
         </Form>
@@ -146,5 +154,3 @@ export default function SaleForm({ dogs, tutors }: SaleFormProps) {
     </Card>
   )
 }
-
-    

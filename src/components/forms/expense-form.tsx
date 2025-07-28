@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast"
 import type { Dog } from "@/lib/types"
 import { addExpense } from "@/lib/data"
 import { Textarea } from "../ui/textarea"
+import { useAuth } from "@/lib/auth.tsx"
 
 
 const formSchema = z.object({
@@ -44,6 +45,7 @@ interface ExpenseFormProps {
 export default function ExpenseForm({ dogs }: ExpenseFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { role } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,6 +56,10 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
   })
  
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (role !== 'admin') {
+        toast({ title: "Acesso Negado", description: "Você não tem permissão para esta ação.", variant: "destructive" });
+        return;
+    }
     try {
         await addExpense({
             ...values,
@@ -74,6 +80,8 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
     }
   }
 
+  const isReadOnly = role !== 'admin';
+
   return (
     <Card>
       <CardContent className="p-6">
@@ -86,7 +94,7 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Cão</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                                 <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione um cão" />
@@ -108,7 +116,7 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Tipo de Despesa</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                                 <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione o tipo" />
@@ -132,7 +140,7 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
                             <FormItem>
                             <FormLabel>Valor (R$)</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="100" {...field} />
+                                <Input type="number" placeholder="100" {...field} disabled={isReadOnly} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -145,7 +153,7 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
                             <FormItem>
                             <FormLabel>Descrição</FormLabel>
                             <FormControl>
-                                <Textarea placeholder="Ração premium para filhotes..." {...field} />
+                                <Textarea placeholder="Ração premium para filhotes..." {...field} disabled={isReadOnly} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -154,7 +162,7 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
                 </div>
                 <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-                    <Button type="submit">Registrar Despesa</Button>
+                    {!isReadOnly && <Button type="submit">Registrar Despesa</Button>}
                 </div>
             </form>
         </Form>
@@ -162,5 +170,3 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
     </Card>
   )
 }
-
-    

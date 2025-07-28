@@ -27,6 +27,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { addGeneralExpense } from "@/lib/data"
 import { Textarea } from "../ui/textarea"
+import { useAuth } from "@/lib/auth.tsx"
 
 
 const formSchema = z.object({
@@ -38,6 +39,7 @@ const formSchema = z.object({
 export default function GeneralExpenseForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const { role } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,6 +50,10 @@ export default function GeneralExpenseForm() {
   })
  
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (role !== 'admin') {
+        toast({ title: "Acesso Negado", description: "Você não tem permissão para esta ação.", variant: "destructive" });
+        return;
+    }
     try {
         await addGeneralExpense({
             ...values,
@@ -67,6 +73,8 @@ export default function GeneralExpenseForm() {
         })
     }
   }
+  
+  const isReadOnly = role !== 'admin';
 
   return (
     <Card>
@@ -80,7 +88,7 @@ export default function GeneralExpenseForm() {
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Tipo de Despesa</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isReadOnly}>
                                 <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecione o tipo" />
@@ -104,7 +112,7 @@ export default function GeneralExpenseForm() {
                             <FormItem>
                             <FormLabel>Valor (R$)</FormLabel>
                             <FormControl>
-                                <Input type="number" placeholder="100" {...field} />
+                                <Input type="number" placeholder="100" {...field} disabled={isReadOnly} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -117,7 +125,7 @@ export default function GeneralExpenseForm() {
                             <FormItem className="md:col-span-2">
                             <FormLabel>Descrição</FormLabel>
                             <FormControl>
-                                <Textarea placeholder="Descreva a despesa..." {...field} />
+                                <Textarea placeholder="Descreva a despesa..." {...field} disabled={isReadOnly} />
                             </FormControl>
                             <FormMessage />
                             </FormItem>
@@ -126,7 +134,7 @@ export default function GeneralExpenseForm() {
                 </div>
                 <div className="flex justify-end gap-2">
                     <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-                    <Button type="submit">Registrar Despesa</Button>
+                    {!isReadOnly && <Button type="submit">Registrar Despesa</Button>}
                 </div>
             </form>
         </Form>
@@ -134,5 +142,3 @@ export default function GeneralExpenseForm() {
     </Card>
   )
 }
-
-    

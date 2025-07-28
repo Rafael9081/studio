@@ -32,6 +32,7 @@ import type { Dog } from "@/lib/types"
 import { addDog, updateDog } from "@/lib/data"
 import { Textarea } from "../ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import { useAuth } from "@/lib/auth.tsx"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -60,6 +61,7 @@ interface DogFormProps {
 export default function DogForm({ dog, allDogs }: DogFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { role } = useAuth();
   const isEditing = !!dog;
   const [imagePreview, setImagePreview] = useState<string | null>(dog?.avatar || null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,6 +96,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
   })
  
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (role !== 'admin') return;
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > MAX_FILE_SIZE) {
@@ -115,6 +118,10 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (role !== 'admin') {
+        toast({ title: "Acesso Negado", description: "Você não tem permissão para esta ação.", variant: "destructive" });
+        return;
+    }
     setIsSubmitting(true);
     
     const dataToSubmit = {
@@ -150,6 +157,8 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
     }
   }
 
+  const isReadOnly = role !== 'admin';
+
   return (
     <Card>
         <CardContent className="p-6">
@@ -166,22 +175,24 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                         {dog?.name?.charAt(0) || '?'}
                                     </AvatarFallback>
                                 </Avatar>
-                                <div className="flex gap-2">
-                                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
-                                    <Upload className="mr-2" />
-                                    {imagePreview ? 'Alterar Foto' : 'Enviar Foto'}
-                                </Button>
-                                {imagePreview && (
-                                    <Button type="button" variant="destructive" onClick={() => {
-                                        setImagePreview(null);
-                                        form.setValue("avatar", undefined);
-                                        if(fileInputRef.current) fileInputRef.current.value = "";
-                                    }}>
-                                        <X className="mr-2" />
-                                        Remover
-                                    </Button>
+                                {!isReadOnly && (
+                                    <div className="flex gap-2">
+                                        <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                                            <Upload className="mr-2" />
+                                            {imagePreview ? 'Alterar Foto' : 'Enviar Foto'}
+                                        </Button>
+                                        {imagePreview && (
+                                            <Button type="button" variant="destructive" onClick={() => {
+                                                setImagePreview(null);
+                                                form.setValue("avatar", undefined);
+                                                if(fileInputRef.current) fileInputRef.current.value = "";
+                                            }}>
+                                                <X className="mr-2" />
+                                                Remover
+                                            </Button>
+                                        )}
+                                    </div>
                                 )}
-                                </div>
                                 <FormControl>
                                     <Input
                                         type="file"
@@ -189,6 +200,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                         ref={fileInputRef}
                                         onChange={handleImageChange}
                                         accept={ACCEPTED_IMAGE_TYPES.join(",")}
+                                        disabled={isReadOnly}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -203,7 +215,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                 <FormItem>
                                 <FormLabel>Nome</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Buddy" {...field} disabled={isSubmitting} />
+                                    <Input placeholder="Buddy" {...field} disabled={isSubmitting || isReadOnly} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -216,7 +228,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                 <FormItem>
                                 <FormLabel>Raça</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Golden Retriever" {...field} disabled={isSubmitting}/>
+                                    <Input placeholder="Golden Retriever" {...field} disabled={isSubmitting || isReadOnly}/>
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -228,7 +240,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Sexo</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isEditing}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isEditing || isReadOnly}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecione o sexo" />
@@ -254,7 +266,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                         <Input 
                                             type="date" 
                                             {...field} 
-                                            disabled={isSubmitting} 
+                                            disabled={isSubmitting || isReadOnly} 
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -267,7 +279,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Pai</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isReadOnly}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecione o pai (opcional)" />
@@ -288,7 +300,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Mãe</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isReadOnly}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecione a mãe (opcional)" />
@@ -310,7 +322,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                 <FormItem className="md:col-span-2">
                                 <FormLabel>Características Especiais</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Ex: Pelagem tigrada, olhos azuis..." {...field} disabled={isSubmitting} />
+                                    <Input placeholder="Ex: Pelagem tigrada, olhos azuis..." {...field} disabled={isSubmitting || isReadOnly} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -323,7 +335,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                 <FormItem className="md:col-span-2">
                                 <FormLabel>Observações Gerais</FormLabel>
                                 <FormControl>
-                                    <Textarea placeholder="Descreva qualquer observação relevante sobre o cão..." {...field} disabled={isSubmitting} />
+                                    <Textarea placeholder="Descreva qualquer observação relevante sobre o cão..." {...field} disabled={isSubmitting || isReadOnly} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -333,9 +345,11 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
 
                     <div className="flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>Cancelar</Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? (isEditing ? 'Salvando...' : 'Registrando...') : (isEditing ? "Salvar Alterações" : "Registrar Cão")}
-                        </Button>
+                        {!isReadOnly && (
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting ? (isEditing ? 'Salvando...' : 'Registrando...') : (isEditing ? "Salvar Alterações" : "Registrar Cão")}
+                            </Button>
+                        )}
                     </div>
                 </form>
             </Form>

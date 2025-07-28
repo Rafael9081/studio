@@ -1,4 +1,6 @@
 
+'use client';
+
 import { getDogById, getDogs, getExpensesByDogId, getTutorById, getDogEvents } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,6 +14,9 @@ import { format, addDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import AddEventDialog from "@/components/dogs/add-event-dialog";
 import EventsHistory from "@/components/dogs/events-history";
+import { useAuth } from "@/lib/auth.tsx";
+import { Dog } from "@/lib/types";
+import { useEffect, useState } from "react";
 
 function calculateAge(birthDate: Date) {
     const today = new Date();
@@ -31,19 +36,62 @@ function calculateAge(birthDate: Date) {
     }
 }
 
-export default async function DogDetailsPage({ params }: { params: { id: string } }) {
-  const dog = await getDogById(params.id);
+export default function DogDetailsPage({ params }: { params: { id: string } }) {
+  const { role } = useAuth();
+  const [dog, setDog] = useState<Dog | undefined>();
+  const [allDogs, setAllDogs] = useState<Dog[]>([]);
+  const [expenses, setExpenses] = useState<any[]>([]);
+  const [tutor, setTutor] = useState<any>(null);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const dogData = await getDogById(params.id);
+        if (!dogData) {
+          notFound();
+          return;
+        }
+        setDog(dogData);
+
+        const [expensesData, allDogsData, eventsData] = await Promise.all([
+          getExpensesByDogId(dogData.id),
+          getDogs(),
+          getDogEvents(dogData.id),
+        ]);
+
+        setExpenses(expensesData);
+        setAllDogs(allDogsData);
+        setEvents(eventsData);
+
+        if (dogData.tutorId) {
+          const tutorData = await getTutorById(dogData.tutorId);
+          setTutor(tutorData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch dog details", error);
+        notFound();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [params.id]);
+
+
+  if (loading) {
+    return (
+        <div className="flex justify-center items-center h-full">
+            <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-primary"></div>
+        </div>
+    );
+  }
   
   if (!dog) {
-    notFound();
+    return notFound();
   }
-
-  const [expenses, allDogs, tutor, events] = await Promise.all([
-    getExpensesByDogId(dog.id),
-    getDogs(),
-    dog.tutorId ? getTutorById(dog.tutorId) : Promise.resolve(null),
-    getDogEvents(dog.id),
-  ]);
 
   const father = dog.fatherId ? allDogs.find(d => d.id === dog.fatherId) : null;
   const mother = dog.motherId ? allDogs.find(d => d.id === dog.motherId) : null;
@@ -73,7 +121,7 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
         </Button>
         <h1 className="text-3xl font-bold font-headline text-center">{dog.name}</h1>
         <div className="flex gap-2">
-            <AddEventDialog dog={dog} maleDogs={maleDogs} />
+            {role === 'admin' && <AddEventDialog dog={dog} maleDogs={maleDogs} />}
             <Button asChild variant="outline">
                 <Link href={`/dogs/${dog.id}/health`}>
                     <HeartPulse className="mr-2" />
@@ -86,12 +134,14 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                     Genealogia
                 </Link>
             </Button>
-            <Button asChild>
-                <Link href={`/dogs/${dog.id}/edit`}>
-                    <Edit className="mr-2" />
-                    Editar
-                </Link>
-            </Button>
+            {role === 'admin' && (
+                <Button asChild>
+                    <Link href={`/dogs/${dog.id}/edit`}>
+                        <Edit className="mr-2" />
+                        Editar
+                    </Link>
+                </Button>
+            )}
         </div>
       </div>
 
@@ -268,5 +318,4 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
       </div>
     </div>
   );
-
-    
+}

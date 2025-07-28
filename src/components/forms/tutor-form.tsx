@@ -1,3 +1,4 @@
+
 'use client'
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -19,6 +20,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import type { Tutor } from "@/lib/types"
 import { addTutor, updateTutor } from "@/lib/data"
+import { useAuth } from "@/lib/auth.tsx"
 
 
 const formSchema = z.object({
@@ -37,6 +39,7 @@ interface TutorFormProps {
 export default function TutorForm({ tutor }: TutorFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { role } = useAuth();
   const isEditing = !!tutor;
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -48,6 +51,10 @@ export default function TutorForm({ tutor }: TutorFormProps) {
   })
  
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (role !== 'admin') {
+        toast({ title: "Acesso Negado", description: "Você não tem permissão para esta ação.", variant: "destructive" });
+        return;
+    }
     try {
         if (isEditing) {
             await updateTutor({ ...tutor, ...values });
@@ -73,6 +80,8 @@ export default function TutorForm({ tutor }: TutorFormProps) {
     }
   }
 
+  const isReadOnly = role !== 'admin';
+
   return (
     <Card>
         <CardContent className="p-6">
@@ -86,7 +95,7 @@ export default function TutorForm({ tutor }: TutorFormProps) {
                                 <FormItem>
                                 <FormLabel>Nome</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="John Doe" {...field} />
+                                    <Input placeholder="John Doe" {...field} disabled={isReadOnly} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -99,7 +108,7 @@ export default function TutorForm({ tutor }: TutorFormProps) {
                                 <FormItem>
                                 <FormLabel>Número de Telefone</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="123-456-7890" {...field} />
+                                    <Input placeholder="123-456-7890" {...field} disabled={isReadOnly} />
                                 </FormControl>
                                 <FormMessage />
                                 </FormItem>
@@ -108,7 +117,7 @@ export default function TutorForm({ tutor }: TutorFormProps) {
                     </div>
                     <div className="flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-                        <Button type="submit">{isEditing ? "Salvar Alterações" : "Registrar Tutor"}</Button>
+                        {!isReadOnly && <Button type="submit">{isEditing ? "Salvar Alterações" : "Registrar Tutor"}</Button>}
                     </div>
                 </form>
             </Form>
