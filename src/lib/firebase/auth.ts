@@ -1,6 +1,4 @@
 
-'use server';
-
 import { auth } from './config';
 import { 
     signInWithEmailAndPassword,
@@ -25,4 +23,3 @@ export async function createTestUser() {
 export async function signOut() {
     await firebaseSignOut(auth);
 }
-
