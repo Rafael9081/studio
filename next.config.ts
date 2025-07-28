@@ -29,4 +29,5 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Resetting cache
 export default nextConfig;

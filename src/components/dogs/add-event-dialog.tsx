@@ -32,6 +32,7 @@ import {
   SelectValue,
   SelectLabel,
   SelectSeparator,
+  SelectGroup,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -137,17 +138,21 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                        <SelectLabel>Reprodutivo</SelectLabel>
-                        {dog.sex === 'Fêmea' && <SelectItem value="Cio">Cio</SelectItem>}
-                        <SelectItem value="Monta">Monta</SelectItem>
-                        {dog.sex === 'Fêmea' && <SelectItem value="Parto">Parto</SelectItem>}
+                        <SelectGroup>
+                          <SelectLabel>Reprodutivo</SelectLabel>
+                          {dog.sex === 'Fêmea' && <SelectItem value="Cio">Cio</SelectItem>}
+                          <SelectItem value="Monta">Monta</SelectItem>
+                          {dog.sex === 'Fêmea' && <SelectItem value="Parto">Parto</SelectItem>}
+                        </SelectGroup>
                         <SelectSeparator />
-                        <SelectLabel>Saúde</SelectLabel>
-                        <SelectItem value="Vacina">Vacina</SelectItem>
-                        <SelectItem value="Vermifugação">Vermifugação</SelectItem>
-                        <SelectItem value="Consulta Veterinária">Consulta Veterinária</SelectItem>
-                        <SelectItem value="Doença/Tratamento">Doença/Tratamento</SelectItem>
-                        <SelectItem value="Pesagem">Pesagem</SelectItem>
+                        <SelectGroup>
+                          <SelectLabel>Saúde</SelectLabel>
+                          <SelectItem value="Vacina">Vacina</SelectItem>
+                          <SelectItem value="Vermifugação">Vermifugação</SelectItem>
+                          <SelectItem value="Consulta Veterinária">Consulta Veterinária</SelectItem>
+                          <SelectItem value="Doença/Tratamento">Doença/Tratamento</SelectItem>
+                          <SelectItem value="Pesagem">Pesagem</SelectItem>
+                        </SelectGroup>
                     </SelectContent>
                   </Select>
                   <FormMessage />
