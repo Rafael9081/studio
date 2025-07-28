@@ -389,13 +389,15 @@ export const addDogEvent = async (event: Omit<DogEvent, 'id'>) => {
     const dog = await getDogById(event.dogId);
     if (!dog) return;
 
-    const dogDocRef = doc(db, 'dogs', event.dogId);
-    
-    // Update dog status based on event, only for females
-    if (dog.sex === 'Fêmea') {
-        if (event.type === 'Monta') {
+    // Update dog status based on event type
+    if (event.type === 'Monta') {
+        if (dog.sex === 'Fêmea') {
+            const dogDocRef = doc(db, 'dogs', event.dogId);
             await updateDoc(dogDocRef, { status: 'Gestante', matingDate: event.date });
-        } else if (event.type === 'Parto') {
+        }
+    } else if (event.type === 'Parto') {
+        if (dog.sex === 'Fêmea') {
+            const dogDocRef = doc(db, 'dogs', event.dogId);
             await updateDoc(dogDocRef, { status: 'Disponível', matingDate: null });
         }
     }
