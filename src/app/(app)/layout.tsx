@@ -52,7 +52,7 @@ function SidebarToggleButton() {
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
-        <div className="container-fluid">
+        <div className="flex min-h-screen">
             <Sidebar>
                 <SidebarHeader>
                 <div className="logo">
