@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, DollarSign, Wallet, TrendingUp } from "lucide-react";
+import { ArrowLeft, DollarSign, Wallet, TrendingUp, BarChart2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
@@ -31,7 +31,7 @@ export default async function FinancialsPage({ params }: { params: { id: string 
           </Link>
         </Button>
         <div className="text-center">
-             <h1 className="text-3xl font-bold font-headline">Relatório Financeiro</h1>
+             <h1 className="text-3xl font-bold font-headline flex items-center gap-2"><BarChart2 /> Relatório Financeiro</h1>
              <p className="text-muted-foreground">Análise de ROI para {dog.name}</p>
         </div>
         <div className="w-[170px]" /> 

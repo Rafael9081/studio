@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Edit, GitBranch } from "lucide-react";
+import { ArrowLeft, Edit, GitBranch, BarChart2 } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -152,6 +152,7 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                         </div>
                          <Button asChild className="w-full">
                             <Link href={`/dogs/${dog.id}/financials`}>
+                                <BarChart2 className="mr-2" />
                                 Ver Relatório Financeiro
                             </Link>
                         </Button>

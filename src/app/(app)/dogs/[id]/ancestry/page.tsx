@@ -1,12 +1,13 @@
 import { getDogById, getDogs } from "@/lib/data";
 import { notFound } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, GitBranch } from "lucide-react";
+import { ArrowLeft, GitBranch, Users } from "lucide-react";
 import { Dog } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import RelationshipFinder from "@/components/ancestry/relationship-finder";
 
 interface AncestryNodeProps {
   dog: Dog | null;
@@ -23,8 +24,8 @@ const AncestryNode: React.FC<AncestryNodeProps> = ({ dog, allDogs, isRoot = fals
     );
   }
 
-  const father = dog.fatherId ? allDogs.find(d => d.id === dog.fatherId) : null;
-  const mother = dog.motherId ? allDogs.find(d => d.id === dog.motherId) : null;
+  const father = dog.fatherId ? allDogs.find(d => d.id === dog.fatherId) : undefined;
+  const mother = dog.motherId ? allDogs.find(d => d.id === dog.motherId) : undefined;
 
   return (
     <div className={cn("flex items-center", !isRoot && "flex-grow")}>
@@ -44,10 +45,8 @@ const AncestryNode: React.FC<AncestryNodeProps> = ({ dog, allDogs, isRoot = fals
         <>
           <div className="w-8 md:w-16 h-px bg-border mx-2"></div>
           <div className="flex flex-col gap-8 w-full">
-            {father && <AncestryNode dog={father} allDogs={allDogs} />}
-            {mother && <AncestryNode dog={mother} allDogs={allDogs} />}
-            {!father && <AncestryNode dog={null} allDogs={allDogs} />}
-            {!mother && <AncestryNode dog={null} allDogs={allDogs} />}
+            <AncestryNode dog={father} allDogs={allDogs} />
+            <AncestryNode dog={mother} allDogs={allDogs} />
           </div>
         </>
       )}
@@ -76,16 +75,20 @@ export default async function AncestryPage({ params }: { params: { id: string } 
         </Button>
         <div className="text-center">
              <h1 className="text-3xl font-bold font-headline">Árvore Genealógica</h1>
-             <p className="text-muted-foreground">Ancestralidade de {dog.name}</p>
+             <p className="text-muted-foreground">Explore a ancestralidade de {dog.name}</p>
         </div>
         <div className="w-[170px]" /> 
       </div>
       
-      <Card className="p-6 md:p-8">
-        <div className="flex flex-col md:flex-row items-center justify-start">
-             <AncestryNode dog={dog} allDogs={allDogs} isRoot />
-        </div>
-      </Card>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <Card className="p-6 md:p-8 xl:col-span-2">
+            <div className="flex flex-col md:flex-row items-center justify-start">
+                <AncestryNode dog={dog} allDogs={allDogs} isRoot />
+            </div>
+        </Card>
+
+        <RelationshipFinder currentDog={dog} allDogs={allDogs} />
+      </div>
     </div>
   );
 }
