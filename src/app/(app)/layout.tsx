@@ -70,6 +70,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 </SidebarFooter>
             </Sidebar>
             <SidebarInset>
+                <header className="header-mobile">
+                    <SidebarTrigger />
+                    <div className="logo-mobile">
+                        <i className="fas fa-paw"></i>
+                        Pawsome
+                    </div>
+                </header>
                 <main className="main-content">
                     {children}
                 </main>
