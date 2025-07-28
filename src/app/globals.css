@@ -102,22 +102,18 @@ body {
 }
 
 .page-header {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
     margin-bottom: 30px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .page-header h2 {
     font-size: 32px;
     font-weight: 700;
-    color: #2d3748;
+    color: white;
     margin-bottom: 8px;
 }
 
 .page-header p {
-    color: #718096;
+    color: rgba(255, 255, 255, 0.8);
     font-size: 16px;
 }
 

@@ -11,14 +11,12 @@ export default async function EditDogPage({ params }: { params: { id: string } }
   }
 
   return (
-    <div className="flex flex-col gap-8">
-       <div>
-          <h1 className="text-3xl font-bold font-headline">Editar Detalhes do Cão</h1>
-          <p className="text-muted-foreground">
-            Atualize as informações para {dog.name}.
-          </p>
-        </div>
-        <DogForm dog={dog} allDogs={dogs} />
-    </div>
+    <>
+      <div className="page-header">
+        <h2>Editar Detalhes do Cão</h2>
+        <p>Atualize as informações para {dog.name}.</p>
+      </div>
+      <DogForm dog={dog} allDogs={dogs} />
+    </>
   )
 }
