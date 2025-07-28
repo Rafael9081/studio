@@ -137,8 +137,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
   }
 
   return (
-    <Card>
-      <CardContent className="p-6">
+    <CardContent className="p-6">
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -318,7 +317,6 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                 </div>
             </form>
         </Form>
-      </CardContent>
-    </Card>
+    </CardContent>
   )
 }
