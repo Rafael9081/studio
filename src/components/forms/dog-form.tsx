@@ -1,3 +1,4 @@
+
 'use client'
 
 import React, { useState } from "react"
@@ -67,7 +68,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
   const maleDogs = allDogs.filter(d => d.sex === 'Macho' && d.id !== dog?.id);
   const femaleDogs = allDogs.filter(d => d.sex === 'Fêmea' && d.id !== dog?.id);
   
-  const formatDateForInput = (date?: Date) => {
+  const formatDateForInput = (date?: Date | string) => {
     if (!date) return '';
     const d = new Date(date);
     const year = d.getFullYear();
@@ -83,7 +84,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
       name: dog?.name || "",
       breed: dog?.breed || "",
       sex: dog?.sex || "Macho",
-      birthDate: dog?.birthDate ? formatDateForInput(new Date(dog.birthDate)) : '',
+      birthDate: dog?.birthDate ? formatDateForInput(dog.birthDate) : '',
       fatherId: dog?.fatherId || "",
       motherId: dog?.motherId || "",
       specialCharacteristics: dog?.specialCharacteristics || "",

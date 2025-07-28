@@ -1,3 +1,4 @@
+
 import { getDogById, getDogs, getExpensesByDogId, getTutorById, getDogEvents } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -124,11 +125,11 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                         <>
                             <div className="flex justify-between">
                                 <span className="font-semibold">Nascimento:</span>
-                                <span>{format(parseISO(dog.birthDate as unknown as string), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                                <span>{format(dog.birthDate, 'dd/MM/yyyy', { locale: ptBR })}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="font-semibold">Idade:</span>
-                                <span>{calculateAge(new Date(dog.birthDate))}</span>
+                                <span>{calculateAge(dog.birthDate)}</span>
                             </div>
                         </>
                     )}
