@@ -124,6 +124,7 @@ body {
 @media (max-width: 768px) {
     .main-content {
         padding: 15px;
+        padding-top: 75px; /* Add padding to account for sticky header */
     }
 }
 
