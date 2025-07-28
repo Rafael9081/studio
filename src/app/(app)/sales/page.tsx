@@ -1,6 +1,6 @@
+
 import SaleForm from "@/components/forms/sale-form";
 import { getDogs, getTutors } from "@/lib/data";
-import { Card } from "@/components/ui/card";
 
 export default async function SalesPage() {
   const allDogs = await getDogs();
@@ -14,9 +14,9 @@ export default async function SalesPage() {
         <h2>Registrar uma Venda</h2>
         <p>Selecione um cão e um tutor para registrar uma nova venda.</p>
       </div>
-      <Card>
-        <SaleForm dogs={availableDogs} tutors={tutors} />
-      </Card>
+      <SaleForm dogs={availableDogs} tutors={tutors} />
     </div>
   )
 }
+
+    

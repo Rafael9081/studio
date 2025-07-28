@@ -1,3 +1,4 @@
+
 'use client'
 
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -22,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { CardContent } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import type { Dog } from "@/lib/types"
 import { addExpense } from "@/lib/data"
@@ -74,7 +75,8 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
   }
 
   return (
-    <CardContent className="p-6">
+    <Card>
+      <CardContent className="p-6">
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -156,6 +158,9 @@ export default function ExpenseForm({ dogs }: ExpenseFormProps) {
                 </div>
             </form>
         </Form>
-    </CardContent>
+      </CardContent>
+    </Card>
   )
 }
+
+    
