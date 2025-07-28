@@ -115,6 +115,16 @@ export const updateDog = async (updatedDog: Omit<Dog, 'id'> & { id: string }) =>
         // Keep the old avatar if a new one isn't provided or it's the same URL
         dogData.avatar = existingDog?.avatar;
     }
+    
+    // Manage pregnancy status
+    if (dogData.sex === 'Fêmea') {
+        if (dogData.matingDate) {
+            dogData.status = 'Gestante';
+        } else if (existingDog?.status === 'Gestante') {
+            dogData.status = 'Disponível'; // Revert status if mating date is removed
+        }
+    }
+
 
     await updateDoc(dogDocRef, dogData);
     revalidatePath('/dogs');

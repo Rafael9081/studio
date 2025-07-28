@@ -5,9 +5,9 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Edit, GitBranch, BarChart2 } from "lucide-react";
+import { ArrowLeft, Edit, GitBranch, BarChart2, CalendarDays } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { format } from "date-fns";
+import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 function calculateAge(birthDate: Date) {
@@ -44,6 +44,18 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
   const father = dog.fatherId ? allDogs.find(d => d.id === dog.fatherId) : null;
   const mother = dog.motherId ? allDogs.find(d => d.id === dog.motherId) : null;
 
+  const getBadgeVariant = () => {
+    switch (dog.status) {
+        case 'Disponível':
+            return 'secondary';
+        case 'Gestante':
+            return 'default';
+        case 'Vendido':
+            return 'destructive';
+        default:
+            return 'default';
+    }
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -83,7 +95,7 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                         <h2 className="text-2xl font-bold">{dog.name}</h2>
                         <p className="text-muted-foreground">{dog.breed}</p>
                     </div>
-                     <Badge variant={dog.status === 'Disponível' ? 'secondary' : 'default'} className="text-sm">
+                     <Badge variant={getBadgeVariant()} className="text-sm">
                         {dog.status}
                     </Badge>
                 </CardContent>
@@ -129,6 +141,29 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                     )}
                 </CardContent>
             </Card>
+
+            {dog.status === 'Gestante' && dog.matingDate && (
+                 <Card className="border-primary">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <CalendarDays className="text-primary" />
+                            Acompanhamento da Gestação
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Data da Monta:</span>
+                            <span>{format(new Date(dog.matingDate), 'dd/MM/yyyy')}</span>
+                        </div>
+                        <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
+                            <span className="font-semibold text-muted-foreground">Previsão de Parto</span>
+                             <span className="text-lg font-bold text-primary">
+                                {format(addDays(new Date(dog.matingDate), 58), 'dd/MM/yy')} - {format(addDays(new Date(dog.matingDate), 65), 'dd/MM/yy')}
+                            </span>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
 
              {dog.status === 'Vendido' && (
                 <Card>

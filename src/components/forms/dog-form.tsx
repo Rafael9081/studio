@@ -31,6 +31,7 @@ import type { Dog } from "@/lib/types"
 import { addDog, updateDog } from "@/lib/data"
 import { Textarea } from "../ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import { Separator } from "../ui/separator"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -49,6 +50,7 @@ const formSchema = z.object({
   specialCharacteristics: z.string().optional(),
   observations: z.string().optional(),
   avatar: z.any().optional(),
+  matingDate: z.date().optional(),
 })
 
 interface DogFormProps {
@@ -79,6 +81,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
       specialCharacteristics: dog?.specialCharacteristics || "",
       observations: dog?.observations || "",
       avatar: dog?.avatar || undefined,
+      matingDate: dog?.matingDate ? new Date(dog.matingDate) : undefined,
     },
   })
  
@@ -114,12 +117,12 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
             })
             router.push(`/dogs/${dog.id}`);
         } else {
-            await addDog(values);
+            const newDog = await addDog(values);
             toast({
                 title: "Sucesso!",
                 description: "Novo cão foi registrado.",
             })
-            router.push('/dogs');
+            router.push(`/dogs/${newDog.id}`);
         }
         router.refresh();
     } catch (error) {
@@ -211,7 +214,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                             render={({ field }) => (
                                 <FormItem>
                                 <FormLabel>Sexo</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
+                                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting || isEditing}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Selecione o sexo" />
@@ -222,6 +225,7 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                     <SelectItem value="Fêmea">Fêmea</SelectItem>
                                     </SelectContent>
                                 </Select>
+                                <FormDescription>{isEditing && "O sexo de um cão não pode ser alterado."}</FormDescription>
                                 <FormMessage />
                                 </FormItem>
                             )}
@@ -314,6 +318,41 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                             )}
                         />
                     </div>
+                    
+                    {isEditing && dog.sex === 'Fêmea' && (
+                        <>
+                            <Separator />
+                            <div>
+                                <h3 className="text-lg font-medium mb-4">Gerenciamento de Gestação</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                     <FormField
+                                        control={form.control}
+                                        name="matingDate"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Data da Monta/Inseminação</FormLabel>
+                                                <FormControl>
+                                                    <Input 
+                                                        type="date" 
+                                                        {...field} 
+                                                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} 
+                                                        onChange={(e) => field.onChange(e.target.valueAsDate)} 
+                                                        disabled={isSubmitting} 
+                                                    />
+                                                </FormControl>
+                                                <FormDescription>
+                                                    Preencher esta data marcará a cadela como "Gestante". Deixe em branco para remover.
+                                                </FormDescription>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
+                            </div>
+                        </>
+                    )}
+
+
                     <div className="flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>Cancelar</Button>
                         <Button type="submit" disabled={isSubmitting}>

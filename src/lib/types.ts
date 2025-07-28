@@ -3,7 +3,7 @@ export type Dog = {
   name: string;
   breed: string;
   sex: 'Macho' | 'Fêmea';
-  status: 'Disponível' | 'Vendido';
+  status: 'Disponível' | 'Vendido' | 'Gestante';
   tutorId?: string;
   salePrice?: number;
   dateOfSale?: Date;
@@ -13,6 +13,7 @@ export type Dog = {
   motherId?: string;
   observations?: string;
   specialCharacteristics?: string;
+  matingDate?: Date;
 };
 
 export type Tutor = {

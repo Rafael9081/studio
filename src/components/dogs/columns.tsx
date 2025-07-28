@@ -50,9 +50,20 @@ export const columns: ColumnDef<Dog>[] = [
     header: 'Status',
     cell: ({ row }) => {
       const status = row.getValue('status') as string;
-      const variant = status === 'Disponível' ? 'secondary' : 'default';
+      const getBadgeVariant = () => {
+        switch (status) {
+            case 'Disponível':
+                return 'secondary';
+            case 'Gestante':
+                return 'default';
+            case 'Vendido':
+                return 'destructive';
+            default:
+                return 'default';
+        }
+      }
       return (
-        <Badge variant={variant}>
+        <Badge variant={getBadgeVariant()}>
           {status}
         </Badge>
       );
