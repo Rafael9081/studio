@@ -58,25 +58,29 @@ export default function EventsHistory({ events }: EventsHistoryProps) {
 
   return (
     <div className="space-y-6">
-      {events.map((event) => (
-        <div key={event.id} className="flex items-start gap-4">
-          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted">
-            {eventIcons[event.type]}
-          </div>
-          <div className="flex-grow">
-            <p className="font-semibold">{event.type}</p>
-            <p className="text-sm text-muted-foreground">{getEventDescription(event)}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {format(parseISO(event.date as unknown as string), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-            </p>
-          </div>
-           {event.weight && event.type !== 'Pesagem' && (
-              <div className="text-sm font-medium text-right text-muted-foreground">
-                  {event.weight} kg
-              </div>
-          )}
-        </div>
-      ))}
+      {events.map((event) => {
+        // Fix for hydration error: ensure date is treated as UTC
+        const date = typeof event.date === 'string' ? parseISO(event.date) : event.date;
+        return (
+            <div key={event.id} className="flex items-start gap-4">
+            <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted">
+                {eventIcons[event.type]}
+            </div>
+            <div className="flex-grow">
+                <p className="font-semibold">{event.type}</p>
+                <p className="text-sm text-muted-foreground">{getEventDescription(event)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                </p>
+            </div>
+            {event.weight && event.type !== 'Pesagem' && (
+                <div className="text-sm font-medium text-right text-muted-foreground">
+                    {event.weight} kg
+                </div>
+            )}
+            </div>
+        )
+      })}
     </div>
   );
 }
