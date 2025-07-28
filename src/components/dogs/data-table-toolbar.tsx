@@ -33,7 +33,7 @@ export function DogsTableToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0
 
   return (
-    <div className="flex items-center justify-between p-4">
+    <div className="flex items-center justify-between w-full">
       <div className="flex flex-1 items-center space-x-2">
         <Input
           placeholder="Filtrar por nome..."
