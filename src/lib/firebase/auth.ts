@@ -1,6 +1,3 @@
-
-'use client';
-
 import { auth } from './config';
 import { 
     signInWithEmailAndPassword,
