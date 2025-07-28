@@ -1,4 +1,5 @@
 import GeneralExpenseForm from "@/components/forms/general-expense-form";
+import { Card } from "@/components/ui/card";
 
 export default async function GeneralExpensesPage() {
   return (
@@ -7,7 +8,9 @@ export default async function GeneralExpensesPage() {
         <h2>Registrar Despesa Geral</h2>
         <p>Use o formulário abaixo para registrar uma despesa do canil.</p>
       </div>
-      <GeneralExpenseForm />
+      <Card>
+        <GeneralExpenseForm />
+      </Card>
     </div>
   )
 }

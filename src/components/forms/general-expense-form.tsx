@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Card, CardContent } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { addGeneralExpense } from "@/lib/data"
 import { Textarea } from "../ui/textarea"
@@ -68,68 +68,66 @@ export default function GeneralExpenseForm() {
   }
 
   return (
-    <Card>
-        <CardContent className="p-6">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                         <FormField
-                            control={form.control}
-                            name="type"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Tipo de Despesa</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecione o tipo" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Material">Material</SelectItem>
-                                        <SelectItem value="Serviços">Serviços</SelectItem>
-                                        <SelectItem value="Funcionários">Funcionários</SelectItem>
-                                        <SelectItem value="Outras">Outras</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name="amount"
-                            render={({ field }) => (
-                                <FormItem>
-                                <FormLabel>Valor (R$)</FormLabel>
+    <CardContent className="p-6">
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField
+                        control={form.control}
+                        name="type"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Tipo de Despesa</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
-                                    <Input type="number" placeholder="100" {...field} />
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecione o tipo" />
+                                </SelectTrigger>
                                 </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                         <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem className="md:col-span-2">
-                                <FormLabel>Descrição</FormLabel>
-                                <FormControl>
-                                    <Textarea placeholder="Descreva a despesa..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
-                    <div className="flex justify-end gap-2">
-                        <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
-                        <Button type="submit">Registrar Despesa</Button>
-                    </div>
-                </form>
-            </Form>
-        </CardContent>
-    </Card>
+                                <SelectContent>
+                                    <SelectItem value="Material">Material</SelectItem>
+                                    <SelectItem value="Serviços">Serviços</SelectItem>
+                                    <SelectItem value="Funcionários">Funcionários</SelectItem>
+                                    <SelectItem value="Outras">Outras</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                        <FormField
+                        control={form.control}
+                        name="amount"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Valor (R$)</FormLabel>
+                            <FormControl>
+                                <Input type="number" placeholder="100" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                        <FormField
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem className="md:col-span-2">
+                            <FormLabel>Descrição</FormLabel>
+                            <FormControl>
+                                <Textarea placeholder="Descreva a despesa..." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                <div className="flex justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => router.back()}>Cancelar</Button>
+                    <Button type="submit">Registrar Despesa</Button>
+                </div>
+            </form>
+        </Form>
+    </CardContent>
   )
 }

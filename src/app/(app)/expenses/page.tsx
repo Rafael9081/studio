@@ -1,5 +1,6 @@
 import ExpenseForm from "@/components/forms/expense-form";
 import { getDogs } from "@/lib/data";
+import { Card } from "@/components/ui/card";
 
 export default async function ExpensesPage() {
   const dogs = await getDogs();
@@ -10,7 +11,9 @@ export default async function ExpensesPage() {
         <h2>Registrar Despesa para um Cão</h2>
         <p>Selecione um cão para registrar uma nova despesa.</p>
       </div>
-      <ExpenseForm dogs={dogs} />
+      <Card>
+        <ExpenseForm dogs={dogs} />
+      </Card>
     </div>
   )
 }
