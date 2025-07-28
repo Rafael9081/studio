@@ -109,7 +109,7 @@ body {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-.page-header h1, .page-header h2 {
+.page-header h2 {
     font-size: 32px;
     font-weight: 700;
     color: #2d3748;
@@ -156,7 +156,6 @@ body {
 
 .stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
 }
 
 .stat-header {
@@ -168,7 +167,7 @@ body {
 
 .stat-title {
     font-size: 16px;
-    color: #718096;
+    color: rgba(255, 255, 255, 0.8);
     font-weight: 500;
 }
 
@@ -190,13 +189,13 @@ body {
 .stat-value {
     font-size: 36px;
     font-weight: 700;
-    color: #2d3748;
+    color: white;
     margin-bottom: 5px;
 }
 
 .stat-subtitle {
     font-size: 14px;
-    color: #a0aec0;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .activity-section {
