@@ -29,5 +29,5 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Resetting cache
+// Resetting cache to fix HMR issue
 export default nextConfig;

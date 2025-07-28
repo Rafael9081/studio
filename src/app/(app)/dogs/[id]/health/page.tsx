@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, Syringe, Bug, Stethoscope, HeartPulse, LineChart } from "lucide-react";
 import { DogEvent } from "@/lib/types";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import WeightChart from "@/components/dogs/weight-chart";
 
@@ -35,7 +35,7 @@ export default async function HealthPage({ params }: { params: { id: string } })
   const weightData = allEvents
     .filter(event => event.weight && event.weight > 0)
     .map(event => ({
-      date: format(parseISO(event.date as unknown as string), 'dd/MM/yy'),
+      date: format(event.date, 'dd/MM/yy'),
       weight: event.weight,
     }))
     .reverse(); // Reverse to have chronological order for the chart
@@ -75,7 +75,7 @@ export default async function HealthPage({ params }: { params: { id: string } })
                                     <p className="font-semibold">{event.type}</p>
                                     <p className="text-sm text-muted-foreground">{event.notes || 'Nenhuma observação.'}</p>
                                     <p className="text-xs text-muted-foreground mt-1">
-                                    {format(parseISO(event.date as unknown as string), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                                    {format(event.date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                                     </p>
                                 </div>
                                 {event.weight && (
