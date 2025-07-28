@@ -6,6 +6,7 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar, Heart, Dog, Baby, Syringe, Bug, Stethoscope, HeartPulse, LineChart } from 'lucide-react';
 import Link from 'next/link';
+import { formatInTimeZone } from 'date-fns-tz';
 
 interface EventsHistoryProps {
   events: DogEvent[];
@@ -59,9 +60,8 @@ export default function EventsHistory({ events }: EventsHistoryProps) {
   return (
     <div className="space-y-6">
       {events.map((event) => {
-        // Fix for hydration error: ensure date is treated as UTC
-        const dateString = typeof event.date === 'string' ? event.date : (event.date as Date).toISOString();
-        const date = parseISO(dateString);
+        const date = event.date instanceof Date ? event.date : parseISO(event.date as unknown as string);
+        const formattedDate = formatInTimeZone(date, 'UTC', "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
         return (
             <div key={event.id} className="flex items-start gap-4">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted">
@@ -71,7 +71,7 @@ export default function EventsHistory({ events }: EventsHistoryProps) {
                 <p className="font-semibold">{event.type}</p>
                 <p className="text-sm text-muted-foreground">{getEventDescription(event)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                {format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                {formattedDate}
                 </p>
             </div>
             {event.weight && event.type !== 'Pesagem' && (
