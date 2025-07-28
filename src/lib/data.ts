@@ -1,6 +1,6 @@
 'use server';
 
-import { type Dog, type Tutor, type Expense, type Sale, type GeneralExpense, type Activity } from './types';
+import { type Dog, type Tutor, type Expense, type Sale, type GeneralExpense, type Activity, type DogEvent } from './types';
 import { type LitterData, type PuppyData } from '@/components/forms/litter-form';
 import { revalidatePath } from 'next/cache';
 import { db, storage } from './firebase/config';
@@ -141,6 +141,13 @@ export const deleteDog = async (id: string) => {
 
     // Delete the dog document
     batch.delete(dogDocRef);
+    
+    // Delete related dog events
+    const eventsQuery = query(collection(db, 'dogEvents'), where('dogId', '==', id));
+    const eventsSnapshot = await getDocs(eventsQuery);
+    eventsSnapshot.forEach(doc => {
+        batch.delete(doc.ref);
+    });
 
     // Delete related expenses
     const expensesQuery = query(collection(db, 'expenses'), where('dogId', '==', id));
@@ -314,6 +321,7 @@ export const addGeneralExpense = async (expense: Omit<GeneralExpense, 'id'>) => 
         description: expense.description,
         link: '/financials', // Link to general financials page
         date: expense.date,
+        avatarUrl: '', // No specific avatar for general expenses
         amount: expense.amount,
         entityId: docRef.id
     });
@@ -335,6 +343,17 @@ export const getSales = async (): Promise<Sale[]> => {
 // Litters
 export const addLitter = async (litter: Omit<LitterData, 'puppies'> & { puppies: PuppyData[] }) => {
     
+    // Add Parto event to mother if she exists
+    if(litter.motherId) {
+        await addDogEvent({
+            dogId: litter.motherId,
+            type: 'Parto',
+            date: litter.birthDate,
+            notes: `Nascimento de ${litter.puppies.length} filhotes.`,
+            puppyCount: litter.puppies.length,
+        });
+    }
+
     for (const puppy of litter.puppies) {
         // We call addDog for each puppy to trigger the recent activity logic
         await addDog({
@@ -352,6 +371,44 @@ export const addLitter = async (litter: Omit<LitterData, 'puppies'> & { puppies:
     revalidatePath('/dashboard');
     revalidatePath('/litters');
 };
+
+// Dog Events
+export const getDogEvents = async (dogId: string): Promise<DogEvent[]> => {
+    const eventsQuery = query(collection(db, 'dogEvents'), where('dogId', '==', dogId), orderBy('date', 'desc'));
+    const snapshot = await getDocs(eventsQuery);
+    return snapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as DogEvent[];
+}
+
+export const addDogEvent = async (event: Omit<DogEvent, 'id'>) => {
+    const eventsCol = collection(db, 'dogEvents');
+    const docRef = await addDoc(eventsCol, event);
+    
+    const dogDocRef = doc(db, 'dogs', event.dogId);
+    
+    // Update dog status based on event
+    if (event.type === 'Monta') {
+        await updateDoc(dogDocRef, { status: 'Gestante', matingDate: event.date });
+    } else if (event.type === 'Parto') {
+        await updateDoc(dogDocRef, { status: 'Disponível', matingDate: null });
+    }
+    
+    // Add to recent activity log
+    const dog = await getDogById(event.dogId);
+    const activityCol = collection(db, 'activity');
+    await addDoc(activityCol, {
+        type: 'event_added',
+        title: `Evento: ${dog?.name}`,
+        description: `Novo evento: ${event.type}. ${event.notes || ''}`,
+        link: `/dogs/${event.dogId}`,
+        date: event.date,
+        avatarUrl: dog?.avatar,
+        entityId: docRef.id
+    });
+    
+    revalidatePath(`/dogs/${event.dogId}`);
+    revalidatePath('/dashboard');
+    return { id: docRef.id, ...event };
+}
 
 // Activity Feed
 export const getRecentActivity = async (count = 10): Promise<Activity[]> => {

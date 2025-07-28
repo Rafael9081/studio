@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ArrowRight, Dog, DollarSign, Wallet, Briefcase } from 'lucide-react';
+import { ArrowRight, Dog, DollarSign, Wallet, Briefcase, Heart } from 'lucide-react';
 
 import { Activity } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,8 @@ function getActivityIcon(type: Activity['type']) {
   switch (type) {
     case 'dog_added':
       return <Dog className="h-5 w-5" />;
+    case 'event_added':
+      return <Heart className="h-5 w-5 text-pink-500" />;
     case 'expense_added':
       return <Wallet className="h-5 w-5 text-red-500" />;
     case 'general_expense_added':

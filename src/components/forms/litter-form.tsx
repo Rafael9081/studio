@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import type { Dog } from "@/lib/types"
 import { addLitter } from "@/lib/data"
@@ -45,7 +45,7 @@ const formSchema = z.object({
   fatherId: z.string().optional(),
   motherId: z.string().optional(),
   breed: z.string().min(2, { message: "A raça deve ter pelo menos 2 caracteres."}),
-  birthDate: z.date({ required_error: "É obrigatório inserir a data de nascimento."}),
+  birthDate: z.string({ required_error: "É obrigatório inserir a data de nascimento."}),
   puppies: z.array(puppySchema).min(1, "Você deve adicionar pelo menos um filhote."),
 })
 
@@ -111,8 +111,13 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
+    const dataToSubmit = {
+      ...values,
+      birthDate: new Date(values.birthDate),
+    };
+
     try {
-        await addLitter(values);
+        await addLitter(dataToSubmit);
 
         toast({
             title: "Sucesso!",
@@ -200,7 +205,7 @@ export default function LitterForm({ maleDogs, femaleDogs }: LitterFormProps) {
                                 <FormItem>
                                     <FormLabel>Data de Nascimento da Ninhada</FormLabel>
                                     <FormControl>
-                                        <Input type="date" {...field} value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => field.onChange(e.target.valueAsDate)} disabled={isSubmitting} />
+                                        <Input type="date" {...field} disabled={isSubmitting} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

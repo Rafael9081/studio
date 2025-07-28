@@ -31,7 +31,6 @@ import type { Dog } from "@/lib/types"
 import { addDog, updateDog } from "@/lib/data"
 import { Textarea } from "../ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-import { Separator } from "../ui/separator"
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
@@ -44,13 +43,12 @@ const formSchema = z.object({
     message: "A raça deve ter pelo menos 2 caracteres.",
   }),
   sex: z.enum(["Macho", "Fêmea"]),
-  birthDate: z.date().optional(),
+  birthDate: z.string().optional(),
   fatherId: z.string().optional(),
   motherId: z.string().optional(),
   specialCharacteristics: z.string().optional(),
   observations: z.string().optional(),
   avatar: z.any().optional(),
-  matingDate: z.date().optional(),
 })
 
 interface DogFormProps {
@@ -68,6 +66,16 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
 
   const maleDogs = allDogs.filter(d => d.sex === 'Macho' && d.id !== dog?.id);
   const femaleDogs = allDogs.filter(d => d.sex === 'Fêmea' && d.id !== dog?.id);
+  
+  const formatDateForInput = (date?: Date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -75,13 +83,12 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
       name: dog?.name || "",
       breed: dog?.breed || "",
       sex: dog?.sex || "Macho",
-      birthDate: dog?.birthDate ? new Date(dog.birthDate) : undefined,
+      birthDate: dog?.birthDate ? formatDateForInput(new Date(dog.birthDate)) : '',
       fatherId: dog?.fatherId || "",
       motherId: dog?.motherId || "",
       specialCharacteristics: dog?.specialCharacteristics || "",
       observations: dog?.observations || "",
       avatar: dog?.avatar || undefined,
-      matingDate: dog?.matingDate ? new Date(dog.matingDate) : undefined,
     },
   })
  
@@ -108,16 +115,22 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
+    
+    const dataToSubmit = {
+      ...values,
+      birthDate: values.birthDate ? new Date(values.birthDate) : undefined,
+    };
+
     try {
         if (isEditing) {
-            await updateDog({ id: dog.id, ...values });
+            await updateDog({ id: dog.id, ...dataToSubmit });
             toast({
                 title: "Sucesso!",
                 description: "Os detalhes do cão foram atualizados.",
             })
             router.push(`/dogs/${dog.id}`);
         } else {
-            const newDog = await addDog(values);
+            const newDog = await addDog(dataToSubmit);
             toast({
                 title: "Sucesso!",
                 description: "Novo cão foi registrado.",
@@ -240,8 +253,6 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                                         <Input 
                                             type="date" 
                                             {...field} 
-                                            value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} 
-                                            onChange={(e) => field.onChange(e.target.valueAsDate)} 
                                             disabled={isSubmitting} 
                                         />
                                     </FormControl>
@@ -318,40 +329,6 @@ export default function DogForm({ dog, allDogs }: DogFormProps) {
                             )}
                         />
                     </div>
-                    
-                    {isEditing && dog.sex === 'Fêmea' && (
-                        <>
-                            <Separator />
-                            <div>
-                                <h3 className="text-lg font-medium mb-4">Gerenciamento de Gestação</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                     <FormField
-                                        control={form.control}
-                                        name="matingDate"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Data da Monta/Inseminação</FormLabel>
-                                                <FormControl>
-                                                    <Input 
-                                                        type="date" 
-                                                        {...field} 
-                                                        value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} 
-                                                        onChange={(e) => field.onChange(e.target.valueAsDate)} 
-                                                        disabled={isSubmitting} 
-                                                    />
-                                                </FormControl>
-                                                <FormDescription>
-                                                    Preencher esta data marcará a cadela como "Gestante". Deixe em branco para remover.
-                                                </FormDescription>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
-                                </div>
-                            </div>
-                        </>
-                    )}
-
 
                     <div className="flex justify-end gap-2">
                         <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSubmitting}>Cancelar</Button>

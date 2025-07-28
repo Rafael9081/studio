@@ -13,7 +13,7 @@ export type Dog = {
   motherId?: string;
   observations?: string;
   specialCharacteristics?: string;
-  matingDate?: Date;
+  matingDate?: Date; // Kept for simplicity, but new events are preferred
 };
 
 export type Tutor = {
@@ -50,7 +50,7 @@ export type Sale = {
 
 export type Activity = {
     id: string;
-    type: 'dog_added' | 'sale_added' | 'expense_added' | 'general_expense_added';
+    type: 'dog_added' | 'sale_added' | 'expense_added' | 'general_expense_added' | 'event_added';
     title: string;
     description: string;
     date: Date;
@@ -58,4 +58,15 @@ export type Activity = {
     avatarUrl?: string;
     amount?: number;
     entityId: string;
+}
+
+export type DogEvent = {
+  id: string;
+  dogId: string;
+  type: 'Cio' | 'Monta' | 'Parto';
+  date: Date;
+  notes?: string;
+  partnerId?: string; // For mating events
+  partnerName?: string; // For mating events
+  puppyCount?: number; // For birth events
 }

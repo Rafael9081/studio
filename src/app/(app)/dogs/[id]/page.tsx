@@ -1,14 +1,16 @@
-import { getDogById, getDogs, getExpensesByDogId, getTutorById } from "@/lib/data";
+import { getDogById, getDogs, getExpensesByDogId, getTutorById, getDogEvents } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Edit, GitBranch, BarChart2, CalendarDays } from "lucide-react";
+import { ArrowLeft, Edit, GitBranch, BarChart2, CalendarDays, PlusCircle } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format, addDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import AddEventDialog from "@/components/dogs/add-event-dialog";
+import EventsHistory from "@/components/dogs/events-history";
 
 function calculateAge(birthDate: Date) {
     const today = new Date();
@@ -35,14 +37,16 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
     notFound();
   }
 
-  const [expenses, allDogs, tutor] = await Promise.all([
+  const [expenses, allDogs, tutor, events] = await Promise.all([
     getExpensesByDogId(dog.id),
     getDogs(),
     dog.tutorId ? getTutorById(dog.tutorId) : Promise.resolve(null),
+    getDogEvents(dog.id),
   ]);
 
   const father = dog.fatherId ? allDogs.find(d => d.id === dog.fatherId) : null;
   const mother = dog.motherId ? allDogs.find(d => d.id === dog.motherId) : null;
+  const maleDogs = allDogs.filter(d => d.sex === 'Macho' && d.id !== dog.id);
 
   const getBadgeVariant = () => {
     switch (dog.status) {
@@ -68,6 +72,7 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
         </Button>
         <h1 className="text-3xl font-bold font-headline text-center">{dog.name}</h1>
         <div className="flex gap-2">
+            <AddEventDialog dog={dog} maleDogs={maleDogs} />
             <Button asChild variant="outline">
                 <Link href={`/dogs/${dog.id}/ancestry`}>
                     <GitBranch className="mr-2" />
@@ -197,6 +202,15 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
 
         </div>
         <div className="lg:col-span-2 flex flex-col gap-8">
+             <Card>
+                <CardHeader>
+                    <CardTitle>Histórico de Eventos</CardTitle>
+                    <CardDescription>Eventos de saúde e reprodutivos de {dog.name}.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <EventsHistory events={events} />
+                </CardContent>
+            </Card>
             <Card>
                 <CardHeader>
                     <CardTitle>Observações Gerais</CardTitle>
