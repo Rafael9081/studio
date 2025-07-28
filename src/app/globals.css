@@ -102,18 +102,23 @@ body {
 }
 
 .page-header {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
     margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
+
 
 .page-header h2 {
     font-size: 32px;
     font-weight: 700;
-    color: white;
+    color: #2d3748;
     margin-bottom: 8px;
 }
 
 .page-header p {
-    color: rgba(255, 255, 255, 0.8);
+    color: #718096;
     font-size: 16px;
 }
 
@@ -384,18 +389,17 @@ body {
 
 /* Dogs Page */
 .page-header.flex {
-  background: transparent;
-  backdrop-filter: none;
-  border-radius: 0;
-  padding: 0;
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
   margin-bottom: 30px;
-  box-shadow: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 .page-header.flex h2 {
-  color: white;
+  color: #2d3748;
 }
 .page-header.flex p {
-  color: rgba(255, 255, 255, 0.8);
+  color: #718096;
 }
 .add-button {
   background: linear-gradient(135deg, #667eea, #764ba2);

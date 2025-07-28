@@ -26,8 +26,6 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { DogsTableToolbar } from './data-table-toolbar';
-import Link from 'next/link';
-import { PlusCircle } from 'lucide-react';
 
 interface DogsDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -70,15 +68,7 @@ export function DogsDataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center bg-primary/10 p-4 rounded-lg">
         <DogsTableToolbar table={table} />
-        <Button asChild className="add-button">
-          <Link href="/dogs/new">
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Adicionar Cão
-          </Link>
-        </Button>
-      </div>
       <div className="rounded-lg border shadow-sm bg-card dogs-table">
         <Table>
           <TableHeader className="table-header">

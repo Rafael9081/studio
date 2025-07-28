@@ -25,7 +25,7 @@ export default async function TutorsPage() {
           </Link>
         </Button>
       </div>
-      <div className="dogs-table-section">
+      <div className="card dogs-table-section">
         <TutorsDataTable columns={columns} data={tutors} />
       </div>
     </div>
