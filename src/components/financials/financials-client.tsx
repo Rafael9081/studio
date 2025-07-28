@@ -1,16 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { Dog, DollarSign, Calendar as CalendarIcon, Wallet, TrendingUp } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dog, DollarSign, Calendar as CalendarIcon, Wallet, TrendingUp, ArrowDown, ArrowUp, BarChart } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { LineChart, CartesianGrid, XAxis, YAxis, Legend } from 'recharts';
+import { LineChart, CartesianGrid, XAxis, YAxis, Legend, Line as RechartsLine } from 'recharts';
 import type { Dog as DogType, Tutor, Sale, Expense, GeneralExpense } from '@/lib/types';
-import { format, sub } from "date-fns"
+import { format, subDays, startOfDay } from "date-fns"
 import { ptBR } from 'date-fns/locale';
 import { DateRange } from "react-day-picker"
 
@@ -22,7 +22,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { Line } from 'recharts';
 
 interface FinancialsClientProps {
   dogs: DogType[];
@@ -31,9 +30,9 @@ interface FinancialsClientProps {
   expenses: (Expense | GeneralExpense)[];
 }
 
-export default function FinancialsClient({ dogs, tutors, sales, expenses }: FinancialsClientProps) {
+export default function FinancialsClient({ dogs, sales, expenses }: FinancialsClientProps) {
   const [date, setDate] = React.useState<DateRange | undefined>({
-    from: sub(new Date(), { days: 29 }),
+    from: subDays(new Date(), 29),
     to: new Date(),
   })
 
@@ -42,8 +41,7 @@ export default function FinancialsClient({ dogs, tutors, sales, expenses }: Fina
   const filteredSales = sales.filter(sale => {
     if (!date?.from) return true;
     const saleDate = new Date(sale.date);
-    const fromDate = new Date(date.from);
-    fromDate.setHours(0,0,0,0);
+    const fromDate = startOfDay(date.from);
     
     if (date.to) {
         const toDate = new Date(date.to)
@@ -56,8 +54,7 @@ export default function FinancialsClient({ dogs, tutors, sales, expenses }: Fina
   const filteredExpenses = expenses.filter(expense => {
     if (!date?.from) return true;
     const expenseDate = new Date(expense.date);
-    const fromDate = new Date(date.from);
-    fromDate.setHours(0,0,0,0);
+    const fromDate = startOfDay(date.from);
     
     if (date.to) {
         const toDate = new Date(date.to)
@@ -74,29 +71,29 @@ export default function FinancialsClient({ dogs, tutors, sales, expenses }: Fina
   const dailyData = [...filteredSales, ...filteredExpenses].reduce((acc, item) => {
     const day = format(new Date(item.date), 'yyyy-MM-dd');
     if (!acc[day]) {
-      acc[day] = { date: day, revenue: 0, expenses: 0 };
+      acc[day] = { date: day, Receita: 0, Despesas: 0 };
     }
     if ('price' in item) {
-      acc[day].revenue += item.price;
+      acc[day].Receita += item.price;
     } else {
-      acc[day].expenses += item.amount;
+      acc[day].Despesas += item.amount;
     }
     return acc;
-  }, {} as Record<string, { date: string, revenue: number, expenses: number }>);
+  }, {} as Record<string, { date: string, Receita: number, Despesas: number }>);
 
   const chartData = Object.values(dailyData).map(item => ({
     date: format(new Date(item.date), 'd MMM', { locale: ptBR }),
-    revenue: item.revenue,
-    expenses: item.expenses
+    Receita: item.Receita,
+    Despesas: item.Despesas
   })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 
   const chartConfig = {
-    revenue: {
+    Receita: {
       label: 'Receita',
       color: 'hsl(var(--chart-1))',
     },
-    expenses: {
+    Despesas: {
         label: 'Despesas',
         color: 'hsl(var(--chart-2))',
     }
@@ -104,67 +101,46 @@ export default function FinancialsClient({ dogs, tutors, sales, expenses }: Fina
 
   return (
     <>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Com base no período selecionado
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Despesas Totais</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {totalExpenses.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Despesas de cães e despesas gerais
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lucro Líquido</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {netProfit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Receitas - Despesas no período
-            </p>
-          </CardContent>
-        </Card>
-         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Cães Disponíveis</CardTitle>
-            <Dog className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{availableDogs}</div>
-            <p className="text-xs text-muted-foreground">Total de cães à venda</p>
-          </CardContent>
-        </Card>
+      <div className="financial-stats">
+          <div className="financial-card revenue">
+              <div className="card-header">
+                  <div className="card-title">Receita Total</div>
+                  <div className="card-icon revenue"><ArrowUp className="h-5 w-5" /></div>
+              </div>
+              <div className="card-value">{totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+              <div className="card-subtitle">Com base no período selecionado</div>
+          </div>
+          <div className="financial-card expense">
+              <div className="card-header">
+                  <div className="card-title">Despesas Totais</div>
+                  <div className="card-icon expense"><ArrowDown className="h-5 w-5" /></div>
+              </div>
+              <div className="card-value">{totalExpenses.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+              <div className="card-subtitle">Despesas de cães e despesas gerais</div>
+          </div>
+          <div className="financial-card profit">
+              <div className="card-header">
+                  <div className="card-title">Lucro Líquido</div>
+                  <div className="card-icon profit"><BarChart className="h-5 w-5" /></div>
+              </div>
+              <div className="card-value profit-value">{netProfit.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+              <div className="card-subtitle">Receitas - Despesas no período</div>
+          </div>
+          <div className="financial-card dogs">
+              <div className="card-header">
+                  <div className="card-title">Cães Disponíveis</div>
+                  <div className="card-icon dogs"><Dog className="h-5 w-5" /></div>
+              </div>
+              <div className="card-value">{availableDogs}</div>
+              <div className="card-subtitle">Total de cães à venda</div>
+          </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="chart-section">
+        <div className="chart-header">
               <div>
-                <CardTitle className="font-headline">Visão Geral Financeira</CardTitle>
-                <p className="text-sm text-muted-foreground">Um resumo de receitas e despesas ao longo do tempo.</p>
+                <h3 className="chart-title">Visão Geral Financeira</h3>
+                <p className="chart-subtitle">Um resumo de receitas e despesas ao longo do tempo.</p>
               </div>
               <Popover>
                 <PopoverTrigger asChild>
@@ -172,7 +148,7 @@ export default function FinancialsClient({ dogs, tutors, sales, expenses }: Fina
                     id="date"
                     variant={"outline"}
                     className={cn(
-                      "w-full sm:w-[300px] justify-start text-left font-normal",
+                      "w-full sm:w-[300px] justify-start text-left font-normal date-range",
                       !date && "text-muted-foreground"
                     )}
                   >
@@ -204,24 +180,32 @@ export default function FinancialsClient({ dogs, tutors, sales, expenses }: Fina
                 </PopoverContent>
               </Popover>
           </div>
-        </CardHeader>
-        <CardContent className="h-[300px]">
+        <div className="chart-container">
           <ChartContainer config={chartConfig} className="w-full h-full">
             <LineChart accessibilityLayer data={chartData}>
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
-              <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `R$${value}`} />
+              <YAxis tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(value) => `R$${(value / 1000)}k`} />
               <ChartTooltip
                 cursor={false}
-                content={<ChartTooltipContent indicator="dot" />}
+                content={<ChartTooltipContent indicator="dot" formatter={(value, name) => `${name}: ${Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`} />}
               />
-              <Legend />
-              <Line dataKey="revenue" type="monotone" stroke="var(--color-revenue)" strokeWidth={2} dot={false} name="Receita" />
-              <Line dataKey="expenses" type="monotone" stroke="var(--color-expenses)" strokeWidth={2} dot={false} name="Despesas" />
+              <RechartsLine dataKey="Receita" type="monotone" stroke="var(--color-Receita)" strokeWidth={3} dot={{r: 6}} fill="rgba(66, 153, 225, 0.1)" name="Receita" />
+              <RechartsLine dataKey="Despesas" type="monotone" stroke="var(--color-Despesas)" strokeWidth={3} dot={{r: 6}} fill="rgba(245, 101, 101, 0.1)" name="Despesas" />
             </LineChart>
           </ChartContainer>
-        </CardContent>
-      </Card>
+        </div>
+          <div className="chart-legend">
+              <div className="legend-item">
+                  <div className="legend-color revenue"></div>
+                  <span>Receitas</span>
+              </div>
+              <div className="legend-item">
+                  <div className="legend-color expense"></div>
+                  <span>Despesas</span>
+              </div>
+          </div>
+      </div>
     </>
   );
 }

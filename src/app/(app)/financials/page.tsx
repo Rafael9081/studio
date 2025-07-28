@@ -12,11 +12,9 @@ export default async function FinancialsPage() {
   
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-3xl font-bold font-headline">Relatório Financeiro</h1>
-        <p className="text-muted-foreground">
-          Acompanhe as receitas e despesas do seu canil.
-        </p>
+      <div className="page-header">
+        <h2>Relatório Financeiro</h2>
+        <p>Acompanhe as receitas e despesas do seu canil</p>
       </div>
       <FinancialsClient dogs={dogs} tutors={tutors} sales={sales} expenses={allExpenses} />
     </div>
