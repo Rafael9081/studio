@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DogEvent } from '@/lib/types';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -27,7 +27,7 @@ function getEventDescription(event: DogEvent) {
         case 'Cio':
             return `Início do cio. ${event.notes || ''}`;
         case 'Monta':
-            if (event.partnerName) {
+            if (event.partnerName && event.partnerId) {
                 return (
                     <>
                         <span>Acalsamento com</span>
@@ -48,6 +48,12 @@ function getEventDescription(event: DogEvent) {
 
 
 export default function EventsHistory({ events }: EventsHistoryProps) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   if (events.length === 0) {
     return (
       <div className="flex h-24 items-center justify-center text-center text-sm text-muted-foreground">
@@ -60,7 +66,7 @@ export default function EventsHistory({ events }: EventsHistoryProps) {
     <div className="space-y-6">
       {events.map((event) => {
         const date = event.date instanceof Date ? event.date : parseISO(event.date as unknown as string);
-        const formattedDate = format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR });
+        const formattedDate = isClient ? format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : '';
         return (
             <div key={event.id} className="flex items-start gap-4">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted">
@@ -70,7 +76,7 @@ export default function EventsHistory({ events }: EventsHistoryProps) {
                 <p className="font-semibold">{event.type}</p>
                 <p className="text-sm text-muted-foreground">{getEventDescription(event)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                {formattedDate}
+                {isClient ? formattedDate : '...'}
                 </p>
             </div>
             {event.weight && event.type !== 'Pesagem' && (
