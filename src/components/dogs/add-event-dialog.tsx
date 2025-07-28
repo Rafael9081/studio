@@ -30,6 +30,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectLabel,
+  SelectSeparator,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -89,12 +91,12 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
       
       form.reset();
       setIsOpen(false);
-      router.refresh();
+      
 
       if (values.type === 'Parto') {
         router.push('/litters/new');
       } else {
-        // No need to do anything else, refresh is called above
+        router.refresh();
       }
     } catch (error) {
       toast({
@@ -135,18 +137,17 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                        <optgroup label="Reprodutivo">
-                            {dog.sex === 'Fêmea' && <SelectItem value="Cio">Cio</SelectItem>}
-                            <SelectItem value="Monta">Monta</SelectItem>
-                            {dog.sex === 'Fêmea' && <SelectItem value="Parto">Parto</SelectItem>}
-                        </optgroup>
-                         <optgroup label="Saúde">
-                            <SelectItem value="Vacina">Vacina</SelectItem>
-                            <SelectItem value="Vermifugação">Vermifugação</SelectItem>
-                            <SelectItem value="Consulta Veterinária">Consulta Veterinária</SelectItem>
-                            <SelectItem value="Doença/Tratamento">Doença/Tratamento</SelectItem>
-                            <SelectItem value="Pesagem">Pesagem</SelectItem>
-                        </optgroup>
+                        <SelectLabel>Reprodutivo</SelectLabel>
+                        {dog.sex === 'Fêmea' && <SelectItem value="Cio">Cio</SelectItem>}
+                        <SelectItem value="Monta">Monta</SelectItem>
+                        {dog.sex === 'Fêmea' && <SelectItem value="Parto">Parto</SelectItem>}
+                        <SelectSeparator />
+                        <SelectLabel>Saúde</SelectLabel>
+                        <SelectItem value="Vacina">Vacina</SelectItem>
+                        <SelectItem value="Vermifugação">Vermifugação</SelectItem>
+                        <SelectItem value="Consulta Veterinária">Consulta Veterinária</SelectItem>
+                        <SelectItem value="Doença/Tratamento">Doença/Tratamento</SelectItem>
+                        <SelectItem value="Pesagem">Pesagem</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
