@@ -34,7 +34,7 @@ export default function DogsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-        <div className="page-header flex justify-between items-center">
+        <div className="page-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h2 className="text-3xl font-bold font-headline">Gerenciar Cães</h2>
                 <p className="text-muted-foreground">
@@ -42,7 +42,7 @@ export default function DogsPage() {
                 </p>
             </div>
             {role === 'admin' && (
-                <Button asChild className="add-button">
+                <Button asChild className="add-button w-full md:w-auto">
                     <Link href="/dogs/new">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Adicionar Cão

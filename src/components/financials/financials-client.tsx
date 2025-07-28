@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -138,7 +139,7 @@ export default function FinancialsClient({ dogs, sales, expenses }: FinancialsCl
 
       <div className="chart-section">
         <div className="chart-header">
-              <div>
+              <div className="w-full md:w-auto">
                 <h3 className="chart-title">Visão Geral Financeira</h3>
                 <p className="chart-subtitle">Um resumo de receitas e despesas ao longo do tempo.</p>
               </div>
