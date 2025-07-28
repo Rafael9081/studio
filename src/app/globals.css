@@ -15,15 +15,15 @@ html, body {
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #4a5568;
-    background-color: #f7fafc; 
 }
 
 
 /* Sidebar */
 .sidebar {
     width: 280px;
-    background: white;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
@@ -381,6 +381,127 @@ body {
 .legend-color { width: 12px; height: 12px; border-radius: 50%; }
 .legend-color.revenue { background: #4299e1; }
 .legend-color.expense { background: #f56565; }
+
+/* Dogs Page */
+.page-header.flex {
+  background: transparent;
+  backdrop-filter: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 30px;
+  box-shadow: none;
+}
+.page-header.flex h2 {
+  color: white;
+}
+.page-header.flex p {
+  color: rgba(255, 255, 255, 0.8);
+}
+.add-button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.add-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.dogs-table-section {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.dogs-table-section table {
+  background: transparent;
+  box-shadow: none;
+}
+
+.dogs-table-section .data-table-toolbar {
+  padding: 0;
+  margin-bottom: 30px;
+}
+
+.dogs-table-section .filter-input {
+  flex: 1;
+  min-width: 250px;
+  padding: 12px 20px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 14px;
+  background: #f7fafc;
+  transition: all 0.3s ease;
+}
+
+.dogs-table-section .filter-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.dogs-table-section .table-header th {
+    background: linear-gradient(135deg, #f7fafc, #edf2f7);
+    padding: 20px;
+    text-align: left;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dogs-table-section tr {
+  border-bottom: 1px solid #e2e8f0;
+}
+.dogs-table-section tr:last-child {
+  border-bottom: none;
+}
+
+.dogs-table-section td {
+  padding: 20px;
+}
+
+.status-vendido {
+  background-color: #c6f6d5 !important;
+  color: #22543d !important;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-gestante {
+  background-color: #fed7d7 !important;
+  color: #742a2a !important;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-disponivel {
+  background-color: #bee3f8 !important;
+  color: #2a4365 !important;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
 
 
 @media (max-width: 768px) {

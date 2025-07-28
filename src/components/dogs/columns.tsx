@@ -20,6 +20,7 @@ import type { Dog } from '@/lib/types';
 import { deleteDog } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '../ui/checkbox';
+import { cn } from '@/lib/utils';
 
 export const columns: ColumnDef<Dog>[] = [
    {
@@ -51,11 +52,11 @@ export const columns: ColumnDef<Dog>[] = [
         const dog = row.original;
         return (
             <Link href={`/dogs/${dog.id}`} className="flex items-center gap-3 group hover:underline">
-                <Avatar>
+                <Avatar className="h-12 w-12">
                     <AvatarImage src={dog.avatar} data-ai-hint="dog" alt={dog.name} />
                     <AvatarFallback>{dog.name.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <span className="font-medium">{dog.name}</span>
+                <span className="font-medium text-base">{dog.name}</span>
             </Link>
         )
     }
@@ -79,20 +80,20 @@ export const columns: ColumnDef<Dog>[] = [
     header: 'Status',
     cell: ({ row }) => {
       const status = row.getValue('status') as string;
-      const getBadgeVariant = () => {
+      const getBadgeClass = () => {
         switch (status) {
             case 'Disponível':
-                return 'secondary';
+                return 'status-disponivel';
             case 'Gestante':
-                return 'default';
+                return 'status-gestante';
             case 'Vendido':
-                return 'destructive';
+                return 'status-vendido';
             default:
-                return 'default';
+                return '';
         }
       }
       return (
-        <Badge variant={getBadgeVariant()}>
+        <Badge className={cn('status-badge', getBadgeClass())}>
           {status}
         </Badge>
       );
@@ -121,7 +122,7 @@ export const columns: ColumnDef<Dog>[] = [
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0 actions-button">
               <span className="sr-only">Abrir menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>

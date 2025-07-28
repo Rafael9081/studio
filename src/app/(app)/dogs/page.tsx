@@ -11,21 +11,23 @@ export default async function DogsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
+       <div className="page-header flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold font-headline">Gerenciar Cães</h1>
+          <h2 className="text-3xl font-bold font-headline">Gerenciar Cães</h2>
           <p className="text-muted-foreground">
             Adicione, edite ou exclua registros de cães.
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="add-button">
           <Link href="/dogs/new">
             <PlusCircle className="mr-2 h-4 w-4" />
             Adicionar Cão
           </Link>
         </Button>
       </div>
-      <DogsDataTable columns={columns} data={dogs} />
+      <div className="dogs-table-section">
+        <DogsDataTable columns={columns} data={dogs} />
+      </div>
     </div>
   );
 }
