@@ -374,9 +374,11 @@ export const addLitter = async (litter: Omit<LitterData, 'puppies'> & { puppies:
 
 // Dog Events
 export const getDogEvents = async (dogId: string): Promise<DogEvent[]> => {
-    const eventsQuery = query(collection(db, 'dogEvents'), where('dogId', '==', dogId), orderBy('date', 'desc'));
+    const eventsQuery = query(collection(db, 'dogEvents'), where('dogId', '==', dogId));
     const snapshot = await getDocs(eventsQuery);
-    return snapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as DogEvent[];
+    const events = snapshot.docs.map(doc => convertTimestamps({ id: doc.id, ...doc.data() })) as DogEvent[];
+    // Sort in code to avoid composite index requirement
+    return events.sort((a, b) => b.date.getTime() - a.date.getTime());
 }
 
 export const addDogEvent = async (event: Omit<DogEvent, 'id'>) => {
