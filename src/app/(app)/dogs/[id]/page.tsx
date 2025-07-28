@@ -154,7 +154,7 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                 </CardContent>
             </Card>
 
-            {dog.status === 'Gestante' && dog.matingDate && (
+            {dog.sex === 'Fêmea' && dog.status === 'Gestante' && dog.matingDate && (
                  <Card className="border-primary">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">

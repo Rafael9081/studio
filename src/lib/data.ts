@@ -1,3 +1,4 @@
+
 'use server';
 
 import { type Dog, type Tutor, type Expense, type Sale, type GeneralExpense, type Activity, type DogEvent } from './types';
@@ -385,17 +386,21 @@ export const addDogEvent = async (event: Omit<DogEvent, 'id'>) => {
     const eventsCol = collection(db, 'dogEvents');
     const docRef = await addDoc(eventsCol, event);
     
+    const dog = await getDogById(event.dogId);
+    if (!dog) return;
+
     const dogDocRef = doc(db, 'dogs', event.dogId);
     
-    // Update dog status based on event
-    if (event.type === 'Monta') {
-        await updateDoc(dogDocRef, { status: 'Gestante', matingDate: event.date });
-    } else if (event.type === 'Parto') {
-        await updateDoc(dogDocRef, { status: 'Disponível', matingDate: null });
+    // Update dog status based on event, only for females
+    if (dog.sex === 'Fêmea') {
+        if (event.type === 'Monta') {
+            await updateDoc(dogDocRef, { status: 'Gestante', matingDate: event.date });
+        } else if (event.type === 'Parto') {
+            await updateDoc(dogDocRef, { status: 'Disponível', matingDate: null });
+        }
     }
     
     // Add to recent activity log
-    const dog = await getDogById(event.dogId);
     const activityCol = collection(db, 'activity');
     await addDoc(activityCol, {
         type: 'event_added',
