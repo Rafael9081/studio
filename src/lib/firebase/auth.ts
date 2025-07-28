@@ -22,10 +22,7 @@ export async function createTestUser() {
     }
 }
 
-// In a real app, you might call this at startup or via a script
-createTestUser();
-
-
 export async function signOut() {
     await firebaseSignOut(auth);
 }
+
