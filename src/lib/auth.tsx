@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 // Adicione aqui o e-mail do administrador
-const ADMIN_EMAIL = 'seu-email-de-admin@aqui.com'; 
+const ADMIN_EMAIL = 'rafael9081@gmail.com'; 
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
