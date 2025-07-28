@@ -165,12 +165,12 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                     <CardContent className="space-y-4">
                         <div className="flex justify-between">
                             <span className="font-semibold">Data da Monta:</span>
-                            <span>{format(parseISO(dog.matingDate as unknown as string), 'dd/MM/yyyy')}</span>
+                            <span>{format(new Date(dog.matingDate), 'dd/MM/yyyy')}</span>
                         </div>
                         <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
                             <span className="font-semibold text-muted-foreground">Previsão de Parto</span>
                              <span className="text-lg font-bold text-primary">
-                                {format(addDays(parseISO(dog.matingDate as unknown as string), 58), 'dd/MM/yy')} - {format(addDays(parseISO(dog.matingDate as unknown as string), 65), 'dd/MM/yy')}
+                                {format(addDays(new Date(dog.matingDate), 58), 'dd/MM/yy')} - {format(addDays(new Date(dog.matingDate), 65), 'dd/MM/yy')}
                             </span>
                         </div>
                     </CardContent>
@@ -195,7 +195,7 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                         </div>
                          <div className="flex justify-between">
                             <span className="font-semibold">Data da Venda:</span>
-                            <span>{dog.dateOfSale ? format(parseISO(dog.dateOfSale as unknown as string), 'dd/MM/yyyy') : 'N/A'}</span>
+                            <span>{dog.dateOfSale ? format(new Date(dog.dateOfSale), 'dd/MM/yyyy') : 'N/A'}</span>
                         </div>
                          <Button asChild className="w-full">
                             <Link href={`/dogs/${dog.id}/financials`}>
@@ -268,4 +268,5 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
       </div>
     </div>
   );
-}
+
+    
