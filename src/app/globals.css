@@ -118,6 +118,7 @@ body {
   flex: 1;
   padding: 30px;
   overflow-y: auto;
+  background-color: transparent;
 }
 
 @media (max-width: 768px) {
