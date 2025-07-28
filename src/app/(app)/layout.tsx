@@ -1,7 +1,7 @@
 
 'use client';
 
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -10,13 +10,12 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarFooter,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import MainNav from '@/components/main-nav';
 import { Button } from '@/components/ui/button';
-import { useSidebar } from '@/components/ui/sidebar';
-
 
 function SidebarToggleButton() {
     const { state, toggleSidebar } = useSidebar();
@@ -50,6 +49,56 @@ function SidebarToggleButton() {
 
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const SidebarToggleButton = () => {
+    const { state, toggleSidebar } = useSidebar();
+
+    if (state === 'collapsed') {
+        return (
+            <Button
+                variant="ghost"
+                size="icon"
+                className="w-full justify-center"
+                onClick={toggleSidebar}
+            >
+                <PanelLeftOpen />
+                <span className="sr-only">Expand sidebar</span>
+            </Button>
+        );
+    }
+
+    return (
+        <Button
+            variant="ghost"
+            size="icon"
+            className="w-full justify-center"
+            onClick={toggleSidebar}
+        >
+            <PanelLeftClose />
+            <span className="sr-only">Collapse sidebar</span>
+        </Button>
+    );
+  }
+
+  const MobileHeader = () => {
+    const { isMobile } = useSidebar();
+    if (!isClient || !isMobile) return null;
+    return (
+        <header className="header-mobile">
+            <SidebarTrigger />
+            <div className="logo-mobile">
+                <i className="fas fa-paw"></i>
+                Pawsome
+            </div>
+        </header>
+    )
+  }
+
   return (
     <SidebarProvider>
         <div className="flex min-h-screen">
@@ -70,13 +119,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 </SidebarFooter>
             </Sidebar>
             <SidebarInset>
-                <header className="header-mobile">
-                    <SidebarTrigger />
-                    <div className="logo-mobile">
-                        <i className="fas fa-paw"></i>
-                        Pawsome
-                    </div>
-                </header>
+                <MobileHeader />
                 <main className="main-content">
                     {children}
                 </main>
