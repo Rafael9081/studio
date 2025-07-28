@@ -8,7 +8,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
-import { LineChart, CartesianGrid, XAxis, YAxis, Legend, Line as RechartsLine } from 'recharts';
+import { LineChart, CartesianGrid, XAxis, YAxis, Legend, Line as RechartsLine, ResponsiveContainer } from 'recharts';
 import type { Dog as DogType, Tutor, Sale, Expense, GeneralExpense } from '@/lib/types';
 import { format, subDays, startOfDay } from "date-fns"
 import { ptBR } from 'date-fns/locale';
