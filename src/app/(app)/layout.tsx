@@ -1,5 +1,7 @@
+
+'use client';
+
 import { type ReactNode } from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   Sidebar,
   SidebarContent,
@@ -8,13 +10,43 @@ import {
   SidebarProvider,
   SidebarTrigger,
   SidebarFooter,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
-import { Dog, Home, Users, Settings, PawPrint } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PawPrint } from 'lucide-react';
 import MainNav from '@/components/main-nav';
+import { Button } from '@/components/ui/button';
+import { useSidebar } from '@/components/ui/sidebar';
+
+function SidebarToggleButton() {
+    const { state, toggleSidebar } = useSidebar();
+
+    if (state === 'collapsed') {
+        return (
+            <Button
+                variant="ghost"
+                size="icon"
+                className="w-full justify-center"
+                onClick={toggleSidebar}
+            >
+                <PanelLeftOpen />
+                <span className="sr-only">Expand sidebar</span>
+            </Button>
+        );
+    }
+
+    return (
+        <Button
+            variant="ghost"
+            size="icon"
+            className="w-full justify-center"
+            onClick={toggleSidebar}
+        >
+            <PanelLeftClose />
+            <span className="sr-only">Collapse sidebar</span>
+        </Button>
+    );
+}
+
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -25,14 +57,18 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
                 <PawPrint className="h-6 w-6" />
             </div>
-            <h1 className="font-headline text-lg font-bold">Gerenciador de Canil</h1>
+             <div className="flex-1 overflow-hidden transition-all duration-300 group-data-[collapsible=icon]:-ml-2 group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0">
+                <h1 className="font-headline text-lg font-bold">Gerenciador de Canil</h1>
+            </div>
           </div>
         </SidebarHeader>
         <SidebarContent>
           <MainNav />
         </SidebarContent>
         <SidebarFooter>
-          {/* O item de Configurações foi removido pois não tinha funcionalidade */}
+            <div className="hidden md:block">
+                 <SidebarToggleButton />
+            </div>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
