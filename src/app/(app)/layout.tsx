@@ -32,16 +32,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           <MainNav />
         </SidebarContent>
         <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip="Configurações">
-                <Link href="#">
-                  <Settings />
-                  <span>Configurações</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+          {/* O item de Configurações foi removido pois não tinha funcionalidade */}
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
