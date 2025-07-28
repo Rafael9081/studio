@@ -22,7 +22,6 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  serverExternalPackages: ['firebase-admin'],
 };
 
 // Resetting cache to fix HMR issue
