@@ -63,10 +63,11 @@ export type Activity = {
 export type DogEvent = {
   id: string;
   dogId: string;
-  type: 'Cio' | 'Monta' | 'Parto';
+  type: 'Cio' | 'Monta' | 'Parto' | 'Vacina' | 'Vermifugação' | 'Consulta Veterinária' | 'Doença/Tratamento' | 'Pesagem';
   date: Date;
   notes?: string;
   partnerId?: string; // For mating events
   partnerName?: string; // For mating events
   puppyCount?: number; // For birth events
+  weight?: number; // For weight records
 }

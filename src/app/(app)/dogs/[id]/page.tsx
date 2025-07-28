@@ -5,9 +5,9 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Edit, GitBranch, BarChart2, CalendarDays, PlusCircle } from "lucide-react";
+import { ArrowLeft, Edit, GitBranch, BarChart2, CalendarDays, PlusCircle, HeartPulse } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { format, addDays } from "date-fns";
+import { format, addDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import AddEventDialog from "@/components/dogs/add-event-dialog";
 import EventsHistory from "@/components/dogs/events-history";
@@ -74,6 +74,12 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
         <div className="flex gap-2">
             <AddEventDialog dog={dog} maleDogs={maleDogs} />
             <Button asChild variant="outline">
+                <Link href={`/dogs/${dog.id}/health`}>
+                    <HeartPulse className="mr-2" />
+                    Saúde
+                </Link>
+            </Button>
+            <Button asChild variant="outline">
                 <Link href={`/dogs/${dog.id}/ancestry`}>
                     <GitBranch className="mr-2" />
                     Genealogia
@@ -118,7 +124,7 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                         <>
                             <div className="flex justify-between">
                                 <span className="font-semibold">Nascimento:</span>
-                                <span>{format(new Date(dog.birthDate), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                                <span>{format(parseISO(dog.birthDate as unknown as string), 'dd/MM/yyyy', { locale: ptBR })}</span>
                             </div>
                             <div className="flex justify-between">
                                 <span className="font-semibold">Idade:</span>
@@ -158,12 +164,12 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                     <CardContent className="space-y-4">
                         <div className="flex justify-between">
                             <span className="font-semibold">Data da Monta:</span>
-                            <span>{format(new Date(dog.matingDate), 'dd/MM/yyyy')}</span>
+                            <span>{format(parseISO(dog.matingDate as unknown as string), 'dd/MM/yyyy')}</span>
                         </div>
                         <div className="flex flex-col items-center p-4 bg-muted rounded-lg">
                             <span className="font-semibold text-muted-foreground">Previsão de Parto</span>
                              <span className="text-lg font-bold text-primary">
-                                {format(addDays(new Date(dog.matingDate), 58), 'dd/MM/yy')} - {format(addDays(new Date(dog.matingDate), 65), 'dd/MM/yy')}
+                                {format(addDays(parseISO(dog.matingDate as unknown as string), 58), 'dd/MM/yy')} - {format(addDays(parseISO(dog.matingDate as unknown as string), 65), 'dd/MM/yy')}
                             </span>
                         </div>
                     </CardContent>
@@ -188,7 +194,7 @@ export default async function DogDetailsPage({ params }: { params: { id: string 
                         </div>
                          <div className="flex justify-between">
                             <span className="font-semibold">Data da Venda:</span>
-                            <span>{dog.dateOfSale ? format(new Date(dog.dateOfSale), 'dd/MM/yyyy') : 'N/A'}</span>
+                            <span>{dog.dateOfSale ? format(parseISO(dog.dateOfSale as unknown as string), 'dd/MM/yyyy') : 'N/A'}</span>
                         </div>
                          <Button asChild className="w-full">
                             <Link href={`/dogs/${dog.id}/financials`}>

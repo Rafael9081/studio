@@ -44,11 +44,12 @@ interface AddEventDialogProps {
 }
 
 const formSchema = z.object({
-  type: z.enum(['Cio', 'Monta', 'Parto']),
+  type: z.enum(['Cio', 'Monta', 'Parto', 'Vacina', 'Vermifugação', 'Consulta Veterinária', 'Doença/Tratamento', 'Pesagem']),
   date: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Data inválida' }),
   notes: z.string().optional(),
   partnerId: z.string().optional(),
   puppyCount: z.coerce.number().optional(),
+  weight: z.coerce.number().optional(),
 });
 
 export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
@@ -64,6 +65,7 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
       notes: '',
       partnerId: '',
       puppyCount: 0,
+      weight: 0,
     },
   });
 
@@ -84,12 +86,15 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
         title: 'Sucesso!',
         description: `Evento "${values.type}" registrado para ${dog.name}.`,
       });
+      
+      form.reset();
+      setIsOpen(false);
+      router.refresh();
 
       if (values.type === 'Parto') {
         router.push('/litters/new');
       } else {
-        form.reset();
-        setIsOpen(false);
+        // No need to do anything else, refresh is called above
       }
     } catch (error) {
       toast({
@@ -130,28 +135,52 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {dog.sex === 'Fêmea' && <SelectItem value="Cio">Cio</SelectItem>}
-                      <SelectItem value="Monta">Monta</SelectItem>
-                      {dog.sex === 'Fêmea' && <SelectItem value="Parto">Parto</SelectItem>}
+                        <optgroup label="Reprodutivo">
+                            {dog.sex === 'Fêmea' && <SelectItem value="Cio">Cio</SelectItem>}
+                            <SelectItem value="Monta">Monta</SelectItem>
+                            {dog.sex === 'Fêmea' && <SelectItem value="Parto">Parto</SelectItem>}
+                        </optgroup>
+                         <optgroup label="Saúde">
+                            <SelectItem value="Vacina">Vacina</SelectItem>
+                            <SelectItem value="Vermifugação">Vermifugação</SelectItem>
+                            <SelectItem value="Consulta Veterinária">Consulta Veterinária</SelectItem>
+                            <SelectItem value="Doença/Tratamento">Doença/Tratamento</SelectItem>
+                            <SelectItem value="Pesagem">Pesagem</SelectItem>
+                        </optgroup>
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Data do Evento</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+                <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Data do Evento</FormLabel>
+                    <FormControl>
+                        <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="weight"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Peso (kg)</FormLabel>
+                        <FormControl>
+                        <Input type="number" step="0.1" placeholder="15.5" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+            </div>
             {eventType === 'Monta' && dog.sex === 'Fêmea' && (
               <FormField
                 control={form.control}

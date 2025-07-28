@@ -4,17 +4,22 @@ import React from 'react';
 import { DogEvent } from '@/lib/types';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, Heart, Dog, Baby } from 'lucide-react';
+import { Calendar, Heart, Dog, Baby, Syringe, Bug, Stethoscope, HeartPulse, LineChart } from 'lucide-react';
 import Link from 'next/link';
 
 interface EventsHistoryProps {
   events: DogEvent[];
 }
 
-const eventIcons = {
+const eventIcons: Record<DogEvent['type'], React.ReactNode> = {
   Cio: <Heart className="h-5 w-5 text-pink-500" />,
   Monta: <Dog className="h-5 w-5 text-blue-500" />,
   Parto: <Baby className="h-5 w-5 text-green-500" />,
+  'Vacina': <Syringe className="h-5 w-5 text-blue-500" />,
+  'Vermifugação': <Bug className="h-5 w-5 text-purple-500" />,
+  'Consulta Veterinária': <Stethoscope className="h-5 w-5 text-teal-500" />,
+  'Doença/Tratamento': <HeartPulse className="h-5 w-5 text-red-500" />,
+  'Pesagem': <LineChart className="h-5 w-5 text-gray-500" />,
 };
 
 function getEventDescription(event: DogEvent) {
@@ -34,6 +39,8 @@ function getEventDescription(event: DogEvent) {
             return `Acalsamento registrado. ${event.notes || ''}`;
         case 'Parto':
             return `${event.puppyCount || 0} filhotes nasceram. ${event.notes || ''}`;
+        case 'Pesagem':
+             return `Peso registrado: ${event.weight} kg. ${event.notes || ''}`
         default:
             return event.notes || 'Evento registrado.';
     }
@@ -63,6 +70,11 @@ export default function EventsHistory({ events }: EventsHistoryProps) {
               {format(parseISO(event.date as unknown as string), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
             </p>
           </div>
+           {event.weight && event.type !== 'Pesagem' && (
+              <div className="text-sm font-medium text-right text-muted-foreground">
+                  {event.weight} kg
+              </div>
+          )}
         </div>
       ))}
     </div>
