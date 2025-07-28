@@ -1,6 +1,5 @@
 import LitterForm from "@/components/forms/litter-form";
 import { getDogs } from "@/lib/data";
-import { Card } from "@/components/ui/card";
 
 export default async function NewLitterPage() {
   const dogs = await getDogs();
@@ -8,14 +7,12 @@ export default async function NewLitterPage() {
   const femaleDogs = dogs.filter(d => d.sex === 'Fêmea');
 
   return (
-    <div className="flex flex-col gap-8">
+    <>
       <div className="page-header">
         <h2>Registrar uma Nova Ninhada</h2>
         <p>Preencha o formulário abaixo para adicionar uma ninhada inteira de uma vez.</p>
       </div>
-      <Card>
-        <LitterForm maleDogs={maleDogs} femaleDogs={femaleDogs} />
-      </Card>
-    </div>
+      <LitterForm maleDogs={maleDogs} femaleDogs={femaleDogs} />
+    </>
   )
 }
