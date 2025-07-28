@@ -60,7 +60,8 @@ export default function EventsHistory({ events }: EventsHistoryProps) {
     <div className="space-y-6">
       {events.map((event) => {
         // Fix for hydration error: ensure date is treated as UTC
-        const date = typeof event.date === 'string' ? parseISO(event.date) : event.date;
+        const dateString = typeof event.date === 'string' ? event.date : (event.date as Date).toISOString();
+        const date = parseISO(dateString);
         return (
             <div key={event.id} className="flex items-start gap-4">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-muted">
