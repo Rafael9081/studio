@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,7 @@ const formSchema = z.object({
 export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,8 +84,13 @@ export default function AddEventDialog({ dog, maleDogs }: AddEventDialogProps) {
         title: 'Sucesso!',
         description: `Evento "${values.type}" registrado para ${dog.name}.`,
       });
-      form.reset();
-      setIsOpen(false);
+
+      if (values.type === 'Parto') {
+        router.push('/litters/new');
+      } else {
+        form.reset();
+        setIsOpen(false);
+      }
     } catch (error) {
       toast({
         title: 'Erro',
