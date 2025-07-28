@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -7,6 +8,12 @@ import {
   getPaginationRowModel,
   useReactTable,
   getFilteredRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  ColumnFiltersState,
+  SortingState,
+  getSortedRowModel,
+  VisibilityState,
 } from '@tanstack/react-table';
 
 import {
@@ -17,8 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { DogsTableToolbar } from './data-table-toolbar';
 
 interface DogsDataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -29,33 +35,46 @@ export function DogsDataTable<TData, TValue>({
   columns,
   data,
 }: DogsDataTableProps<TData, TValue>) {
+    const [rowSelection, setRowSelection] = React.useState({})
+    const [columnVisibility, setColumnVisibility] =
+        React.useState<VisibilityState>({})
+    const [columnFilters, setColumnFilters] =
+        React.useState<ColumnFiltersState>([])
+    const [sorting, setSorting] = React.useState<SortingState>([])
+
+
   const table = useReactTable({
     data,
     columns,
+    state: {
+        sorting,
+        columnVisibility,
+        rowSelection,
+        columnFilters,
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFacetedRowModel: getFacetedRowModel(),
+    getFacetedUniqueValues: getFacetedUniqueValues(),
   });
 
   return (
     <div className="rounded-lg border shadow-sm bg-card">
-      <div className="p-4">
-        <Input
-          placeholder="Filtrar por nome..."
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('name')?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-      </div>
+      <DogsTableToolbar table={table} />
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} colSpan={header.colSpan}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -91,23 +110,29 @@ export function DogsDataTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
-      <div className="flex items-center justify-end space-x-2 p-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Anterior
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Próximo
-        </Button>
+       <div className="flex items-center justify-end space-x-2 p-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} de{" "}
+          {table.getFilteredRowModel().rows.length} linha(s) selecionadas.
+        </div>
+        <div className="space-x-2">
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+            >
+                Anterior
+            </Button>
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+            >
+                Próximo
+            </Button>
+        </div>
       </div>
     </div>
   );

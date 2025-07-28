@@ -19,8 +19,31 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { Dog } from '@/lib/types';
 import { deleteDog } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
+import { Checkbox } from '../ui/checkbox';
 
 export const columns: ColumnDef<Dog>[] = [
+   {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Selecionar tudo"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Selecionar linha"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: 'name',
     header: 'Nome',
@@ -40,10 +63,16 @@ export const columns: ColumnDef<Dog>[] = [
   {
     accessorKey: 'breed',
     header: 'Raça',
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    }
   },
   {
     accessorKey: 'sex',
     header: 'Sexo',
+     filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    }
   },
   {
     accessorKey: 'status',
@@ -68,6 +97,9 @@ export const columns: ColumnDef<Dog>[] = [
         </Badge>
       );
     },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    }
   },
   {
     id: 'actions',
@@ -102,6 +134,7 @@ export const columns: ColumnDef<Dog>[] = [
             <DropdownMenuItem asChild>
               <Link href={`/dogs/${dog.id}/edit`}>Editar Detalhes</Link>
             </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
                 Excluir Registro
             </DropdownMenuItem>
