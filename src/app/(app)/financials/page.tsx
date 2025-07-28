@@ -1,11 +1,5 @@
 import { getDogs, getSales, getExpenses, getGeneralExpenses, getTutors } from "@/lib/data";
-import dynamic from 'next/dynamic';
-import Loading from "../loading";
-
-const FinancialsClient = dynamic(() => import('@/components/financials/financials-client'), {
-  ssr: false,
-  loading: () => <div className="h-[70vh]"><Loading /></div>
-});
+import FinancialsLoader from "@/components/financials/financials-loader";
 
 export default async function FinancialsPage() {
   const dogs = await getDogs();
@@ -22,7 +16,12 @@ export default async function FinancialsPage() {
         <h2>Relatório Financeiro</h2>
         <p>Acompanhe as receitas e despesas do seu canil</p>
       </div>
-      <FinancialsClient dogs={dogs} tutors={tutors} sales={sales} expenses={allExpenses} />
+      <FinancialsLoader 
+        dogs={dogs} 
+        tutors={tutors} 
+        sales={sales} 
+        expenses={allExpenses} 
+      />
     </div>
   );
 }
