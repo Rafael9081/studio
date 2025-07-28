@@ -1,8 +1,7 @@
 
-
 'use client';
 
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import {
   Sidebar,
   SidebarContent,
@@ -17,6 +16,10 @@ import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import MainNav from '@/components/main-nav';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
+import Loading from './loading';
+
 
 function SidebarToggleButton() {
     const { state, toggleSidebar } = useSidebar();
@@ -50,6 +53,23 @@ function SidebarToggleButton() {
 
 
 export default function AppLayout({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading || !user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loading />
+      </div>
+    )
+  }
+
   return (
     <SidebarProvider>
         <div className="flex min-h-screen">
