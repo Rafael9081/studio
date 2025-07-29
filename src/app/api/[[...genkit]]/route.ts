@@ -3,5 +3,7 @@
  * Genkit flows defined in the application.
  */
 
-import {nextJSHandler} from '@genkit-ai/next';
-export const POST = nextJSHandler();
+import { genkitNextHandler } from '@genkit-ai/next';
+
+export const POST = genkitNextHandler();
+
